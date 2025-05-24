@@ -1,0 +1,9 @@
+[package]
+name = "engelsystem-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.45.0", features = ["full"] }
+engelsystem-rs-db = { path = "../engelsystem-rs-db" }
+anyhow = "1.0.98"
