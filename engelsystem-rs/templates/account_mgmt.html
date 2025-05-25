@@ -10,11 +10,19 @@
   <div class="bg-indigo-900 text-gray-100 es-account-form self-center">
     <h2 class="text-center">{% block form_name %}{% endblock form_name %}</h2>
 
+    {% if created and not error %}
+      <p class="text-sm">Du hast dich erfolgreich registriert. Bitte melde dich nun an.</p>
+    {% endif %}
+
+    {% if error %}
+      <p class="text-red-500 mt-2.5 text-center">Nutzername und/oder Passwort falsch</p>
+    {% endif %}
+
     <form class="flex flex-col" method="post" target="_self">
       {% block fields %}{% endblock fields %}
 
       {% if errors %}
-        <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors | join(sep=", ")}}</p>
+        <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors | join(sep=", ") }}</p>
       {% endif %}
     
       <input class="mt-5 hover:bg-indigo-950 cursor-pointer" type="submit" name="submit" value="Senden">

@@ -29,7 +29,7 @@ impl MigrationTrait for Migration {
                     .table(Permission::Table)
                     .if_not_exists()
                     .col(pk_auto(Permission::Id))
-                    .col(string(Permission::Name))
+                    .col(string_uniq(Permission::Name))
                     .to_owned(),
             )
             .await?;
@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
                     .table(Role::Table)
                     .if_not_exists()
                     .col(pk_auto(Role::Id))
-                    .col(string(Role::Name))
+                    .col(string_uniq(Role::Name))
                     .to_owned(),
             )
             .await?;
@@ -67,10 +67,28 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(pk_uuid(User::Id))
                     .col(timestamp(User::Created).default(Expr::current_timestamp()))
-                    .col(string(User::Username))
+                    .col(string_uniq(User::Username))
+                    .col(string_uniq(User::Email))
+                    .col(string_null(User::PasswordHash))
                     .col(integer(User::RoleId))
                     .foreign_key(&mut user_role_foreign_key)
                     .to_owned(),
+            )
+            .await?;
+
+        // ============================
+        // Session
+        // ============================
+        
+        manager
+            .create_table(
+                Table::create()
+                    .table(Session::Table)
+                    .if_not_exists()
+                    .col(string_len(Session::Id, 4064).primary_key())
+                    .col(string_null(Session::Data))
+                    .col(date_time_null(Session::ExpiresAt))
+                    .to_owned()
             )
             .await
     }
@@ -84,6 +102,9 @@ impl MigrationTrait for Migration {
             .await?;
         manager
             .drop_table(Table::drop().table(Role::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(Session::Table).to_owned())
             .await
     }
 }
@@ -134,5 +155,15 @@ pub enum User {
     Id,
     Created,
     Username,
+    Email,
+    PasswordHash,
     RoleId,
+}
+
+#[derive(DeriveIden)]
+pub enum Session {
+    Table,
+    Id,
+    Data,
+    ExpiresAt,
 }

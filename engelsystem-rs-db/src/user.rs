@@ -1,78 +1,170 @@
+use std::time::Duration;
+
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::PasswordHasher;
+use argon2::{password_hash::SaltString, Argon2};
+use argon2::{PasswordHash, PasswordVerifier};
 use entity::*;
 use sea_orm::{prelude::*, ActiveValue::*};
+use tracing::error;
 
-use crate::role::{ADMIN_ROLE_ID, GUEST_ROLE_ID, USER_ROLE_ID};
+use crate::role::RoleType;
+use crate::Error;
 
-pub async fn get_all_guests(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    User::find().filter(user::Column::RoleId.eq(GUEST_ROLE_ID)).all(db).await
+pub async fn get_all_guests(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
+    Ok(User::find()
+        .filter(user::Column::RoleId.eq(RoleType::Guest as u32))
+        .all(db)
+        .await?)
 }
 
-pub async fn get_all_users(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    User::find().all(db).await
+pub async fn get_all_users(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
+    Ok(User::find().all(db).await?)
 }
 
-pub async fn get_all_admins(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    User::find().filter(user::Column::RoleId.eq(ADMIN_ROLE_ID)).all(db).await
+pub async fn get_all_admins(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
+    Ok(User::find()
+        .filter(user::Column::RoleId.eq(RoleType::Admin as u32))
+        .all(db)
+        .await?)
 }
 
-pub async fn get_user_count(db: &DatabaseConnection) -> Result<u64, DbErr> {
-    User::find().count(db).await
+pub async fn get_user_count(db: &DatabaseConnection) -> crate::Result<u64> {
+    Ok(User::find().count(db).await?)
 }
 
-pub async fn add_guest(username: impl Into<String>, db: &DatabaseConnection) -> Result<user::Model, DbErr> {
-    ActiveUser {
+pub fn hash_password(plain_password: &str) -> crate::Result<String> {
+    let hasher = Argon2::default();
+    let salt = SaltString::generate(&mut OsRng);
+    let password_hash = hasher
+        .hash_password(plain_password.as_bytes(), &salt)
+        .map_err(|_| Error::Hashing)?
+        .to_string();
+    Ok(password_hash)
+}
+
+fn verify_password(plain_password: &str, hashed_password: &str) -> bool {
+    let hasher = Argon2::default();
+    let hashed = match PasswordHash::new(hashed_password) {
+        Ok(hashed) => hashed,
+        Err(e) => {
+            error!("Failed to parse hashed password from database: {e}");
+            return false;
+        }
+    };
+
+    hasher.verify_password(plain_password.as_bytes(), &hashed).is_ok()
+}
+
+pub async fn verify_user(username: &str, plain_password: &str, db: &DatabaseConnection) -> Option<user::Model> {
+    tokio::time::sleep(Duration::from_millis(rand::random_range(0..2000))).await;
+
+    let user = match User::find()
+        .filter(user::Column::Username.eq(username))
+        .one(db)
+        .await
+    {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return None;
+        }
+        Err(e) => {
+            error!("Error when retrieving user from database: {e}");
+            return None;
+        }
+    };
+
+    if verify_password(plain_password, &user.password_hash) {
+        return Some(user);
+    }
+
+    None
+}
+
+pub async fn add_generic_user(
+    username: impl Into<String>,
+    email: impl Into<String>,
+    plain_password: &str,
+    role: RoleType,
+    db: &DatabaseConnection,
+) -> crate::Result<user::Model> {
+    let password_hash = hash_password(plain_password)?;
+
+    let model = ActiveUser {
         username: Set(username.into()),
-        role_id: Set(GUEST_ROLE_ID),
+        role_id: Set(role as u32),
+        email: Set(email.into()),
+        password_hash: Set(password_hash),
         ..Default::default()
     }
     .insert(db)
-    .await
+    .await?;
+
+    Ok(model)
 }
 
-pub async fn add_user(username: impl Into<String>, db: &DatabaseConnection) -> Result<user::Model, DbErr> {
-    ActiveUser {
-        username: Set(username.into()),
-        role_id: Set(USER_ROLE_ID),
-        ..Default::default()
-    }
-    .insert(db)
-    .await
+#[inline]
+pub async fn add_guest(
+    username: impl Into<String>,
+    email: impl Into<String>,
+    plain_password: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<user::Model> {
+    add_generic_user(username, email, plain_password, RoleType::Guest, db).await
 }
 
-pub async fn add_admin(username: impl Into<String>, db: &DatabaseConnection) -> Result<user::Model, DbErr> {
-    ActiveUser {
-        username: Set(username.into()),
-        role_id: Set(ADMIN_ROLE_ID),
-        ..Default::default()
-    }
-    .insert(db)
-    .await
+#[inline]
+pub async fn add_user(
+    username: impl Into<String>,
+    email: impl Into<String>,
+    plain_password: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<user::Model> {
+    add_generic_user(username, email, plain_password, RoleType::User, db).await
+}
+
+#[inline]
+pub async fn add_admin(
+    username: impl Into<String>,
+    email: impl Into<String>,
+    plain_password: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<user::Model> {
+    add_generic_user(username, email, plain_password, RoleType::Admin, db).await
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::connect_and_migrate_dummy;
     use super::*;
+    use crate::tests::connect_and_migrate_dummy;
     use test_log::test;
 
     #[test(tokio::test)]
     async fn single_user() {
         let db = connect_and_migrate_dummy().await.unwrap();
-        
-        let user = add_guest("Meow", &db).await.unwrap();
+
+        let user = add_guest("Meow", "meow@meow.de", "awawa", &db)
+            .await
+            .unwrap();
 
         let mut all_users = get_all_users(&db).await.unwrap();
 
-        assert_eq!(all_users.pop().unwrap(), user);
+        let db_user = all_users.pop().unwrap();
         assert_eq!(all_users.pop(), None);
+        assert_eq!(db_user, user);
+        assert_ne!(db_user.password_hash, "awawa");
     }
 
     #[test(tokio::test)]
     async fn multi_user() {
         let db = connect_and_migrate_dummy().await.unwrap();
-        
-        let user  = add_guest("Meow", &db).await.unwrap();
-        let user2 = add_guest("Meow2", &db).await.unwrap();
+
+        let user = add_guest("Meow", "meow@meow.de", "awawa", &db)
+            .await
+            .unwrap();
+        let user2 = add_guest("Meow2", "meow@meow.de", "awawa", &db)
+            .await
+            .unwrap();
 
         let all_users = get_all_users(&db).await.unwrap();
 

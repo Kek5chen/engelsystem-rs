@@ -1,10 +1,13 @@
 use sea_orm::entity::prelude::*;
 
+pub type RoleId = u32;
+
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "role")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: u32,
+    pub id: RoleId,
+    #[sea_orm(unique_key)]
     pub name: String,
 }
 

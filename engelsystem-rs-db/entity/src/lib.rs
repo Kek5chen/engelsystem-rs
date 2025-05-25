@@ -10,3 +10,6 @@ pub use permission::ActiveModel as ActivePermission;
 
 pub use role::Entity      as Role;
 pub use role::ActiveModel as ActiveRole;
+
+pub use session::Entity      as Session;
+pub use session::ActiveModel as ActiveSession;

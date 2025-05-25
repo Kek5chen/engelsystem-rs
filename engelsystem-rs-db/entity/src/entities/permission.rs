@@ -5,6 +5,7 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key)]
     id: u32,
+    #[sea_orm(unique_key)]
     name: String,
 }
 
