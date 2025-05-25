@@ -1,0 +1,21 @@
+{# templates login.html #}
+{% extends "base.html" %}
+
+{% block header %}
+{% include "_navbar.html" %}
+{% endblock header %}
+
+{% block content %}
+<section class="flex justify-center align-center h-full w-full">
+  <div class="bg-indigo-900 text-gray-100 es-account-form self-center">
+    <h2 class="text-center">Einloggen</h2>
+    <form class="flex flex-col" method="post" target="_self">
+      <label for="username">Nutzername</label>
+      <input type="text" name="username">
+      <label for="password">Password</label>
+      <input type="text" name="password">
+      <input class="mt-5" type="submit" name="submit" value="Senden">
+    </form>
+  </div>
+</section>
+{% endblock content %}

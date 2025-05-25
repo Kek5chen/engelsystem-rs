@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+.es-account-form input {
+  @apply border-1 rounded-xs p-0.5
+}
+
+.es-account-form h2 {
+  @apply text-2xl
+}
+
+.es-account-form label {
+  @apply text-xs mt-5 mb-0.5 
+}
+
+.es-account-form {
+  @apply p-10
+}
+

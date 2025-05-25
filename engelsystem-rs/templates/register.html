@@ -1,0 +1,27 @@
+{# templates register.html #}
+{% extends "base.html" %}
+
+{% block header %}
+{% include "_navbar.html" %}
+{% endblock header %}
+
+{% block content %}
+<section class="flex justify-center align-center h-full w-full">
+  <div class="bg-indigo-900 text-gray-100 es-account-form self-center">
+    <h2 class="text-center">Registrieren</h2>
+    <form class="flex flex-col" method="post" target="_self">
+      <label for="username">Nutzername</label>
+      <input type="text" name="username">
+      <label for="email">Email</label>
+      <input type="text" name="email">
+      <label for="password">Password</label>
+      <input type="text" name="password">
+      <div class="flex flex-row mt-5 gap-2">
+        <input type="checkbox" name="tc-check">
+        <p>Ich stimme zu dass ich eine Katze bin</p>
+      </div>
+      <input class="mt-5" type="submit" name="submit" value="Senden">
+    </form>
+  </div>
+</section>
+{% endblock content %}
