@@ -1,0 +1,24 @@
+{# templates account_mgmt.html #}
+{% extends "base.html" %}
+
+{% block header %}
+{% include "_navbar.html" %}
+{% endblock header %}
+
+{% block content %}
+<section class="flex justify-center align-center h-full w-full">
+  <div class="bg-indigo-900 text-gray-100 es-account-form self-center">
+    <h2 class="text-center">{% block form_name %}{% endblock form_name %}</h2>
+
+    <form class="flex flex-col" method="post" target="_self">
+      {% block fields %}{% endblock fields %}
+
+      {% if errors %}
+        <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors | join(sep=", ")}}</p>
+      {% endif %}
+    
+      <input class="mt-5 hover:bg-indigo-950 cursor-pointer" type="submit" name="submit" value="Senden">
+    </form>
+  </div>
+</section>
+{% endblock content %}

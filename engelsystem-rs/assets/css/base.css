@@ -13,6 +13,6 @@
 }
 
 .es-account-form {
-  @apply p-10
+  @apply p-10 shadow-2xl
 }
 
