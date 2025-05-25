@@ -4,15 +4,19 @@ use sea_orm::{prelude::*, ActiveValue::*};
 use crate::role::{ADMIN_ROLE_ID, GUEST_ROLE_ID, USER_ROLE_ID};
 
 pub async fn get_all_guests(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    Ok(user::Entity::find().filter(user::Column::RoleId.eq(GUEST_ROLE_ID)).all(db).await?)
+    User::find().filter(user::Column::RoleId.eq(GUEST_ROLE_ID)).all(db).await
 }
 
 pub async fn get_all_users(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    Ok(user::Entity::find().all(db).await?)
+    User::find().all(db).await
 }
 
 pub async fn get_all_admins(db: &DatabaseConnection) -> Result<Vec<user::Model>, DbErr> {
-    Ok(user::Entity::find().filter(user::Column::RoleId.eq(ADMIN_ROLE_ID)).all(db).await?)
+    User::find().filter(user::Column::RoleId.eq(ADMIN_ROLE_ID)).all(db).await
+}
+
+pub async fn get_user_count(db: &DatabaseConnection) -> Result<u64, DbErr> {
+    User::find().count(db).await
 }
 
 pub async fn add_guest(username: impl Into<String>, db: &DatabaseConnection) -> Result<user::Model, DbErr> {

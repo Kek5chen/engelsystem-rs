@@ -1,14 +1,15 @@
 pub mod error;
 pub mod user;
 pub mod role;
+pub mod permission;
 
 pub use error::*;
 
 use migration::MigratorTrait;
-use sea_orm::DatabaseConnection;
+pub use sea_orm::DatabaseConnection;
 
-pub async fn connect() -> Result<DatabaseConnection, sea_orm::DbErr> {
-    todo!()
+pub async fn connect(connection_string: &str) -> Result<DatabaseConnection, sea_orm::DbErr> {
+    sea_orm::Database::connect(connection_string).await
 }
 
 pub async fn migrate(db: DatabaseConnection) -> Result<DatabaseConnection, migration::DbErr> {
@@ -16,8 +17,8 @@ pub async fn migrate(db: DatabaseConnection) -> Result<DatabaseConnection, migra
     Ok(db)
 }
 
-pub async fn connect_and_migrate() -> Result<DatabaseConnection, sea_orm::DbErr> {
-    migrate(connect().await?).await
+pub async fn connect_and_migrate(connection_string: &str) -> Result<DatabaseConnection, sea_orm::DbErr> {
+    migrate(connect(connection_string).await?).await
 }
 
 

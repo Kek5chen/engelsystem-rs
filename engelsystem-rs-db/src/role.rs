@@ -5,6 +5,10 @@ pub const GUEST_ROLE_ID: u32 = 1;
 pub const USER_ROLE_ID: u32 = 2;
 pub const ADMIN_ROLE_ID: u32 = 3;
 
+pub async fn get_role_count(db: &DatabaseConnection) -> Result<u64, DbErr> {
+    Role::find().count(db).await
+}
+
 pub async fn get_role_by_name(name: &str, db: &DatabaseConnection) -> Result<Option<role::Model>, DbErr> {
     Role::find()
         .filter(role::Column::Name.eq(name))
@@ -21,7 +25,7 @@ mod tests {
     #[test(tokio::test)]
     async fn role_seeding() {
         let db = connect_and_migrate_dummy().await.unwrap();
-        let role_count = Role::find().count(&db).await.unwrap();
+        let role_count = get_role_count(&db).await.unwrap();
         assert!(role_count > 0);
     }
 
