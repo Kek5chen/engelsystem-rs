@@ -17,6 +17,7 @@ async fn landing_page(db: Data<DatabaseConnection>, templates: Data<Tera>) -> Re
     let user_count = get_user_count(&db).await?;
     let role_count = get_role_count(&db).await?;
     let perm_count = get_perm_count(&db).await?;
+
     let context = Context::from_serialize(json!({
         "org": "Real Org",
         "rows": {
