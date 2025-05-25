@@ -4,13 +4,13 @@
   <h2 class="text-fixed text-xl">Instanz Statistiken:</h1>
   <table class="table-fixed text-center mx-10">
     <tbody>
-      {% for row in rows %}
+      {% for key, val in rows %}
       <tr>
         <td>
-          {{ row.0 | escape }}
+          {{ key | escape }}
         </td>
         <td>
-          {{ row.1 }}
+          {{ val }}
         </td>
       </tr>
       {% endfor %}

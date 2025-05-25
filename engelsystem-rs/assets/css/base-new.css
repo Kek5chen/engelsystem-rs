@@ -1,5 +1,4 @@
 /*! tailwindcss v4.1.7 | MIT License | https://tailwindcss.com */
-@layer properties;
 @layer theme, base, components, utilities;
 @layer theme {
   :root, :host {
@@ -179,12 +178,6 @@
   .static {
     position: static;
   }
-  .float-end {
-    float: inline-end;
-  }
-  .float-start {
-    float: inline-start;
-  }
   .mx-10 {
     margin-inline: calc(var(--spacing) * 10);
   }
@@ -200,148 +193,38 @@
   .flex {
     display: flex;
   }
-  .table {
-    display: table;
-  }
-  .w-2 {
-    width: calc(var(--spacing) * 2);
-  }
-  .w-3 {
-    width: calc(var(--spacing) * 3);
-  }
-  .w-5 {
-    width: calc(var(--spacing) * 5);
-  }
-  .w-30 {
-    width: calc(var(--spacing) * 30);
-  }
-  .w-50 {
-    width: calc(var(--spacing) * 50);
-  }
-  .w-70 {
-    width: calc(var(--spacing) * 70);
-  }
   .flex-1 {
     flex: 1;
   }
   .flex-2 {
     flex: 2;
   }
-  .table-auto {
-    table-layout: auto;
-  }
   .table-fixed {
     table-layout: fixed;
-  }
-  .border-collapse {
-    border-collapse: collapse;
-  }
-  .cursor-pointer {
-    cursor: pointer;
-  }
-  .resize {
-    resize: both;
   }
   .flex-col {
     flex-direction: column;
   }
-  .flex-row {
-    flex-direction: row;
-  }
   .items-center {
     align-items: center;
-  }
-  .justify-center {
-    justify-content: center;
-  }
-  .gap-1 {
-    gap: calc(var(--spacing) * 1);
-  }
-  .gap-2 {
-    gap: calc(var(--spacing) * 2);
   }
   .gap-2\.5 {
     gap: calc(var(--spacing) * 2.5);
   }
-  .gap-3 {
-    gap: calc(var(--spacing) * 3);
-  }
-  .gap-5 {
-    gap: calc(var(--spacing) * 5);
-  }
   .gap-20 {
     gap: calc(var(--spacing) * 20);
-  }
-  .space-x-2 {
-    :where(& > :not(:last-child)) {
-      --tw-space-x-reverse: 0;
-      margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
-      margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
-    }
   }
   .self-center {
     align-self: center;
   }
-  .rounded-2xl {
-    border-radius: var(--radius-2xl);
-  }
-  .rounded-lg {
-    border-radius: var(--radius-lg);
-  }
-  .rounded-sm {
-    border-radius: var(--radius-sm);
-  }
-  .border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
-  .bg-amber-50 {
-    background-color: var(--color-amber-50);
-  }
   .bg-gray-900 {
     background-color: var(--color-gray-900);
-  }
-  .bg-indigo-100 {
-    background-color: var(--color-indigo-100);
-  }
-  .bg-indigo-400 {
-    background-color: var(--color-indigo-400);
-  }
-  .bg-indigo-500 {
-    background-color: var(--color-indigo-500);
-  }
-  .bg-indigo-900 {
-    background-color: var(--color-indigo-900);
   }
   .bg-indigo-950 {
     background-color: var(--color-indigo-950);
   }
-  .p-1 {
-    padding: calc(var(--spacing) * 1);
-  }
-  .p-2 {
-    padding: calc(var(--spacing) * 2);
-  }
-  .p-2\.5 {
-    padding: calc(var(--spacing) * 2.5);
-  }
-  .p-3 {
-    padding: calc(var(--spacing) * 3);
-  }
-  .p-5 {
-    padding: calc(var(--spacing) * 5);
-  }
-  .p-7 {
-    padding: calc(var(--spacing) * 7);
-  }
-  .p-10 {
-    padding: calc(var(--spacing) * 10);
-  }
   .p-20 {
     padding: calc(var(--spacing) * 20);
-  }
-  .px-2 {
-    padding-inline: calc(var(--spacing) * 2);
   }
   .px-2\.5 {
     padding-inline: calc(var(--spacing) * 2.5);
@@ -349,26 +232,14 @@
   .px-5 {
     padding-inline: calc(var(--spacing) * 5);
   }
-  .px-20 {
-    padding-inline: calc(var(--spacing) * 20);
-  }
   .px-50 {
     padding-inline: calc(var(--spacing) * 50);
-  }
-  .py-2 {
-    padding-block: calc(var(--spacing) * 2);
   }
   .py-2\.5 {
     padding-block: calc(var(--spacing) * 2.5);
   }
-  .py-10 {
-    padding-block: calc(var(--spacing) * 10);
-  }
   .pt-0 {
     padding-top: calc(var(--spacing) * 0);
-  }
-  .pt-20 {
-    padding-top: calc(var(--spacing) * 20);
   }
   .text-center {
     text-align: center;
@@ -385,50 +256,10 @@
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
   }
-  .font-medium {
-    --tw-font-weight: var(--font-weight-medium);
-    font-weight: var(--font-weight-medium);
-  }
   .text-gray-100 {
     color: var(--color-gray-100);
   }
   .text-indigo-100 {
     color: var(--color-indigo-100);
-  }
-  .underline {
-    text-decoration-line: underline;
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
-  }
-}
-@property --tw-space-x-reverse {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0;
-}
-@property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@property --tw-font-weight {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-outline-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@layer properties {
-  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
-    *, ::before, ::after, ::backdrop {
-      --tw-space-x-reverse: 0;
-      --tw-border-style: solid;
-      --tw-font-weight: initial;
-      --tw-outline-style: solid;
-    }
   }
 }
