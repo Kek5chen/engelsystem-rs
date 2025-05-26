@@ -1,19 +1,18 @@
 {# templates/_navbar.html #}
 
-<div class="flex bg-indigo-950 px-2.5">
+<nav class="flex bg-indigo-950 px-2.5">
   <div class="mr-auto self-center">
     <a href="/">
       <h2 class="text-gray-100 text-xl self-center px-2.5">Engelsystem</h3>
     </a>
+    <div class="flex gap-2.5 ml-auto py-2.5">
+    {% if not logged_in %}
+      <a href="/register" class="text-indigo-100 px-5 py-2.5">Registrieren</a>
+      <a href="/login" class="text-indigo-100 px-5 py-2.5">Einloggen</a>
+    </div>
+    {% else %}
+      <a href="/logout" class="text-indigo-100 px-5 py-2.5">Ausloggen</a>
+    {% endif %}
+    </div>
   </div>
-  {% if not logged_in %}
-  <div class="flex gap-2.5 ml-auto py-2.5">
-    <a href="/register" class="text-indigo-100 px-5 py-2.5">Registrieren</a>
-    <a href="/login" class="text-indigo-100 px-5 py-2.5">Einloggen</a>
-  </div>
-  {% else %}
-  <div class="flex gap-2.5 ml-auto py-2.5">
-    <a href="/logout" class="text-indigo-100 px-5 py-2.5">Ausloggen</a>
-  </div>
-  {% endif %}
-</div>
+</nav>

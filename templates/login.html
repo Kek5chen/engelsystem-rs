@@ -1,12 +1,12 @@
-{# templates login.html #}
+{# templates/login.html #}
 {% extends "account_mgmt.html" %}
 
 {% block form_name %}Einloggen{% endblock form_name %}
 
 {% block fields %}
-<label for="username">Nutzername</label>
-<input type="text" name="username" required="required">
+<input id="username" type="text" name="username" required autocomplete="username" placeholder="Nutzername"
+  class="w-full rounded bg-slate-900/40 p-2.5 focus:outline-none focus:ring-2 focus:ring-teal-400" />
 
-<label for="password">Password</label>
-<input type="password" name="password" required="required">
+<input id="password" type="password" name="password" required autocomplete="current-password" placeholder="Passwort"
+  class="w-full rounded bg-slate-900/40 p-2.5 focus:outline-none focus:ring-2 focus:ring-teal-400" />
 {% endblock fields %}

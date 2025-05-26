@@ -44,7 +44,13 @@ async fn main() -> Result<()> {
         .with(EnvFilter::from_default_env())
         .init();
 
-    let templates = Tera::new("templates/*").context(TemplateErr)?;
+    let templates = match Tera::new("templates/*").context(TemplateErr) {
+        Ok(tera) => tera,
+        Err(e) => {
+            tracing::error!("Couldn't load templates: {e}");
+            return Ok(());
+        },
+    };
     for template in templates.get_template_names() {
         debug!("loaded: {template}");
     }
