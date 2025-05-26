@@ -1211,6 +1211,7 @@ dependencies = [
  "actix-session",
  "actix-web",
  "anyhow",
+ "dotenvy",
  "engelsystem-rs-db",
  "regex",
  "serde",

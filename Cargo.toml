@@ -21,6 +21,7 @@ zeroize = { version = "1.8.1", features = ["serde"] }
 snafu = "0.8.5"
 anyhow = "1.0.98"
 uuid = "1.17.0"
+dotenvy = "0.15.7"
 
 [workspace]
 resolver = "3"

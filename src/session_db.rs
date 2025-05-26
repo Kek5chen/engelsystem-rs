@@ -57,7 +57,7 @@ impl SessionStore for DbSessionStore {
         };
 
         let session_key: Result<SessionKey, _> = session.try_into();
-        Ok(session_key.map_err(|e| SaveError::Other(e.into()))?)
+        session_key.map_err(|e| SaveError::Other(e.into()))
     }
 
     async fn update(
