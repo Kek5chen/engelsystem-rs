@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue::Set;
+use serde::Serialize;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "user")]
@@ -47,3 +48,12 @@ impl ActiveModelBehavior for ActiveModel {
     }
 }
 
+#[derive(DerivePartialModel, Serialize)]
+#[sea_orm(entity = "Entity", from_query_result)]
+pub struct UserView {
+    pub id: Uuid,
+    pub created: DateTimeLocal,
+    pub username: String,
+    pub email: String,
+    pub role_id: u32,
+}

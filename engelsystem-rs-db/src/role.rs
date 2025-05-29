@@ -2,7 +2,7 @@ use entity::*;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Clone)]
 pub enum RoleType {
     Guest = 1,
     User = 2,

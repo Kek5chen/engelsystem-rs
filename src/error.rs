@@ -35,9 +35,17 @@ pub enum Error {
     #[snafu(display("You are unauthorized to access this resource."))]
     SessionUnauthenticated,
 
+    #[snafu(display("You are unauthorized to access this resource."))]
+    SessionUnauthorized,
+
     #[snafu(display("Data from the session couldn't be deserialized: {source:?}"))]
     SessionDeserialize {
         source: SessionGetError,
+    },
+
+    #[snafu(display("The given Uid ({uid})was not valid"))]
+    InvalidUid {
+        uid: String,
     }
 }
 

@@ -1,4 +1,4 @@
-use std::{env, process::exit};
+use std::{env, net::Ipv4Addr, process::exit};
 
 use crate::error::generated::*;
 use crate::routes::*;
@@ -69,9 +69,11 @@ pub async fn run_server() -> crate::Result<()> {
             .service(request_login)
             .service(request_logout)
             .service(welcome_page)
+            .service(user_list)
+            .service(view_user)
             .service(Files::new("/static", "assets"))
     })
-    .bind((std::net::Ipv4Addr::UNSPECIFIED, 8080))
+    .bind((Ipv4Addr::UNSPECIFIED, 8080))
     .context(WebserverErr)?
     .run()
     .await

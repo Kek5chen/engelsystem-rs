@@ -8,11 +8,11 @@
 {% block content %}
 
 <section>
-  <h1 class="text-3xl font-bold">Willkommen, {{ user.username }}!</h1>
+  <h1 class="text-3xl font-bold">Willkommen, {{ user.uid }}!</h1>
   <p class="text-gray-300">Schön, dich an Bord zu haben. Hier sind ein paar schnelle Fakten über deinen Account:</p>
   <ul class="space-y-1 text-sm">
-    <li><span class="text-teal-300">User&nbsp;ID:</span> {{ user.user_id }}</li>
-    <li><span class="text-teal-300">Rollen&nbsp;ID:</span> {{ user.role_id }}</li>
+    <li><span class="text-teal-300">User&nbsp;ID:</span> {{ user.uid }}</li>
+    <li><span class="text-teal-300">Rollen&nbsp;ID:</span> {{ user.role }}</li>
   </ul>
 </section>
 {% endblock content %}
