@@ -7,6 +7,7 @@ use argon2::{PasswordHash, PasswordVerifier};
 use entity::*;
 use sea_orm::{prelude::*, ActiveValue::*};
 use tracing::error;
+use user::UserView;
 
 use crate::role::RoleType;
 use crate::Error;
@@ -29,8 +30,16 @@ pub async fn get_all_admins(db: &DatabaseConnection) -> crate::Result<Vec<user::
         .await?)
 }
 
+pub async fn get_all_user_views(db: &DatabaseConnection) -> crate::Result<Vec<user::UserView>> {
+    Ok(User::find().into_partial_model().all(db).await?)
+}
+
 pub async fn get_user_count(db: &DatabaseConnection) -> crate::Result<u64> {
     Ok(User::find().count(db).await?)
+}
+
+pub async fn get_user_view_by_id(uid: Uuid, db: &DatabaseConnection) -> crate::Result<Option<UserView>> {
+    Ok(User::find_by_id(uid).into_partial_model().one(db).await?)
 }
 
 pub fn hash_password(plain_password: &str) -> crate::Result<String> {

@@ -5,7 +5,7 @@ use snafu::{IntoError, ResultExt};
 use tera::{Context, Tera};
 use validator::Validate;
 use zeroize::Zeroizing;
-use crate::utils::validation::*;
+use crate::{generated::TemplateErr, utils::validation::*};
 
 use crate::generated::DatabaseErr;
 
@@ -30,7 +30,7 @@ async fn register_page(templates: Data<Tera>) -> crate::Result<impl Responder> {
     let rendered = templates.render("register.html", &context)
         .map_err(|e| {
             tracing::error!("Template error: {e}");
-            crate::error::generated::TemplateErr.into_error(e)
+            TemplateErr.into_error(e)
         })?;
 
     Ok(Html::new(rendered))

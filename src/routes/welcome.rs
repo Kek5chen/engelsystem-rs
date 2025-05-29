@@ -2,12 +2,12 @@ use actix_web::{get, web::{Data, Html}, Responder};
 use snafu::IntoError;
 use tera::{Context, Tera};
 
-use crate::authorize_middleware::BasicUserAuth;
+use crate::authorize_middleware::{BasicGuestAuth, BasicUser};
 
 #[get("/welcome")]
 async fn welcome_page(
     templates: Data<Tera>,
-    user: BasicUserAuth,
+    user: BasicUser<BasicGuestAuth>,
 ) -> crate::Result<impl Responder> {
     let mut context = Context::new();
 
