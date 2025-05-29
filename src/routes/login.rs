@@ -49,7 +49,7 @@ pub async fn request_login(
     let user = verify_user(&data.username, &data.password, &db).await;
 
     if let Some(user) = user {
-        session.purge();
+        session.clear();
         session.insert("user_id", user.id)?;
         session.insert("role_id", user.role_id)?;
 
