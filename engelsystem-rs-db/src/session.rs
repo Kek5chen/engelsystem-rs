@@ -78,7 +78,7 @@ pub async fn save_session(
     ActiveSession {
         id: Set(session_key.clone()),
         data: Set(data),
-        expires_at: Set(expires_at.into()),
+        expires_at: Set(expires_at),
     }.insert(db)
     .await?;
 

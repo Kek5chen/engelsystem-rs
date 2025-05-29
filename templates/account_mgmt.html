@@ -1,8 +1,8 @@
-{# templates account_mgmt.html #}
+{# templates/account_mgmt.html #}
 {% extends "base.html" %}
 
 {% block header %}
-{% include "_navbar.html" %}
+  {% include "_navbar.html" %}
 {% endblock header %}
 
 {% block content %}
@@ -11,7 +11,7 @@
     <h2 class="text-center">{% block form_name %}{% endblock form_name %}</h2>
 
     {% if created and not error %}
-      <p class="text-sm">Du hast dich erfolgreich registriert. Bitte melde dich nun an.</p>
+      <p class="mb-4 text-center text-sm text-teal-400">Registrierung erfolgreich. Du kannst dich jetzt anmelden.</p>
     {% endif %}
 
     {% if error %}
