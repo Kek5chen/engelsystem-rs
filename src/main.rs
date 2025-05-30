@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
             .service(welcome)
             .service(Files::new("/static", "assets"))
     })
-    .bind((Ipv4Addr::UNSPECIFIED, 8080))
+    .bind((Ipv4Addr::UNSPECIFIED, 8081))
     .context(WebserverErr)?
     .run()
     .await
@@ -226,7 +226,7 @@ async fn request_login(
     db: Data<DatabaseConnection>,
     session: Session,
 ) -> Result<impl Responder> {
-    let user = verify_user(&data.username, &data.password, &db).await;
+    let user = verify_user(&data.username, &data.password.as_str(), &db).await;
 
     if let Some(user) = user {
         session.insert("user_id", user.id)?;
