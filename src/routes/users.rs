@@ -2,8 +2,7 @@ use std::str::FromStr;
 
 use actix_web::{
     get,
-    web::{Data, Html},
-    HttpMessage, Responder,
+    web::{self, Data, Html}, Responder,
 };
 use engelsystem_rs_db::{
     role::RoleType,
@@ -16,7 +15,7 @@ use uuid::Uuid;
 
 use crate::{
     authorize_middleware::{BasicAdminAuth, BasicAuthTrait, BasicUser},
-    generated::{DatabaseErr, InvalidUidErr, TemplateErr},
+    generated::{DatabaseErr, TemplateErr},
     Error,
 };
 
@@ -36,7 +35,7 @@ impl BasicAuthTrait for UserViewAuth {
 
         // TODO: This is currently just a bogus check to see if the authorization design works.
 
-        if user.role == RoleType::Admin {
+        if user.role == RoleType::Admin || user.uid.to_string() == user_id {
             Ok(user)
         } else {
             Err(Error::SessionUnauthorized)
@@ -55,7 +54,8 @@ pub async fn user_list(
     let users = get_all_user_views(&db).await.context(DatabaseErr)?;
     let mut context = Context::new();
 
-    context.insert("user_list", &users);
+    context.insert("org", "Real Org");
+    context.insert("users", &users);
 
     Ok(Html::new(
         templates
@@ -69,12 +69,14 @@ pub async fn view_user(
     templates: Data<Tera>,
     db: Data<DatabaseConnection>,
     _user: BasicUser<UserViewAuth>,
-    uid: String,
+    user_id: web::Path<String>,
 ) -> crate::Result<impl Responder> {
+    let uid = user_id.into_inner();
     let uid = Uuid::from_str(&uid).map_err(|_| Error::InvalidUid { uid })?;
     let user = get_user_view_by_id(uid, &db).await.context(DatabaseErr)?;
     let mut context = Context::new();
 
+    context.insert("org", "Real Org");
     context.insert("user", &user);
 
     Ok(Html::new(

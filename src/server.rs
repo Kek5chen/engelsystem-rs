@@ -6,7 +6,8 @@ use crate::session_db::DbSessionStore;
 use actix_files::Files;
 use actix_session::SessionMiddleware;
 use actix_web::{cookie::Key, web::Data, App, HttpServer};
-use engelsystem_rs_db::connect_and_migrate;
+use engelsystem_rs_db::{connect_and_migrate, user::{add_generic_user, add_guest, get_user_count}};
+use rand::{distr::Alphanumeric, Rng};
 use snafu::ResultExt;
 use tera::Tera;
 use tracing::{debug, warn};
@@ -48,6 +49,36 @@ pub async fn run_server() -> crate::Result<()> {
     let db = connect_and_migrate(&url)
         .await
         .context(DatabaseErr)?;
+
+    if env::var("DUMMY_USERS").is_ok() {
+        let user_count = get_user_count(&db).await.context(DatabaseErr)?;
+        if user_count < 100 {
+            warn!("The database will be filled with dummy users");
+            for _ in  user_count..100 {
+                let mut email: String = rand::rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(10)
+                    .map(char::from)
+                    .collect();
+                let username: String = rand::rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(10)
+                    .map(char::from)
+                    .collect();
+                email.push_str("@engelsystem.rs");
+                add_guest(
+                    &username,
+                    &email,
+                    "awawa",
+                    &db
+                )
+                    .await
+                    .context(DatabaseErr)?;
+            }
+        }
+        
+    }
+
     let shared_db = Data::new(db);
 
     HttpServer::new(move || {

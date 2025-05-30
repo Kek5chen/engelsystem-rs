@@ -1,6 +1,8 @@
-dev: setup
-	npx tailwindcss -i ./assets/css/base.css -o ./assets/css/base-new.css --watch &
+dev:
 	RUST_LOG=debug cargo watch -x run -i '*sqlite*'
+
+dev-css:
+	npx tailwindcss -i ./assets/css/base.css -o ./assets/css/base-new.css --watch
 
 build-css: setup
 	npx tailwindcss -i ./assets/css/base.css -o ./assets/css/base-new.css

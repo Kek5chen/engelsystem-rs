@@ -5,7 +5,7 @@ use argon2::password_hash::PasswordHasher;
 use argon2::{password_hash::SaltString, Argon2};
 use argon2::{PasswordHash, PasswordVerifier};
 use entity::*;
-use sea_orm::{prelude::*, ActiveValue::*};
+use sea_orm::{prelude::*, ActiveValue::*, QuerySelect};
 use tracing::error;
 use user::UserView;
 
@@ -31,7 +31,12 @@ pub async fn get_all_admins(db: &DatabaseConnection) -> crate::Result<Vec<user::
 }
 
 pub async fn get_all_user_views(db: &DatabaseConnection) -> crate::Result<Vec<user::UserView>> {
-    Ok(User::find().into_partial_model().all(db).await?)
+    Ok(User::find()
+        .inner_join(Role)
+        .column_as(role::Column::Name, "role")
+        .into_model::<UserView>()
+        .all(db)
+        .await?)
 }
 
 pub async fn get_user_count(db: &DatabaseConnection) -> crate::Result<u64> {
@@ -39,7 +44,12 @@ pub async fn get_user_count(db: &DatabaseConnection) -> crate::Result<u64> {
 }
 
 pub async fn get_user_view_by_id(uid: Uuid, db: &DatabaseConnection) -> crate::Result<Option<UserView>> {
-    Ok(User::find_by_id(uid).into_partial_model().one(db).await?)
+    Ok(User::find_by_id(uid)
+        .inner_join(Role)
+        .column_as(role::Column::Name, "role")
+        .into_model::<UserView>()
+        .one(db)
+        .await?)
 }
 
 pub fn hash_password(plain_password: &str) -> crate::Result<String> {
