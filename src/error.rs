@@ -43,7 +43,7 @@ pub enum Error {
         source: SessionGetError,
     },
 
-    #[snafu(display("The given Uid ({uid})was not valid"))]
+    #[snafu(display("The given Uid ({uid}) was not valid"))]
     InvalidUid {
         uid: String,
     }

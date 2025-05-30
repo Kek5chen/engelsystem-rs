@@ -1,0 +1,24 @@
+{# templates/user_view.html #}
+{% extends "base.html" %}
+
+{% block header %}
+  {% include "_navbar.html" %}
+{% endblock header %}
+
+{% block content %}
+<section class="p-6 shadow w-full scroll-auto">
+  <h1 class="mb-5 text-3xl">Useransicht</h1>
+  <ul>
+    <li>
+      Uid: 
+      <a href="/users/{{ user.id }}">
+        {{ user.id }}
+      </a>
+    </li>
+    <li>Erstellungsdatum: {{ user.created }}</li>
+    <li>Nutzername: {{ user.username }}</li>
+    <li>Email: {{ user.email }}</li>
+    <li>Rolle: {{ user.role }}</li>
+  </ul>
+</section>
+{% endblock content %}

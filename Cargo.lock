@@ -1213,6 +1213,7 @@ dependencies = [
  "anyhow",
  "dotenvy",
  "engelsystem-rs-db",
+ "rand 0.9.1",
  "regex",
  "serde",
  "serde_json",
