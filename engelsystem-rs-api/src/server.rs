@@ -3,34 +3,17 @@ use std::{env, net::Ipv4Addr, process::exit};
 use crate::error::generated::*;
 use crate::routes::*;
 use crate::session_db::DbSessionStore;
-use actix_files::Files;
 use actix_session::SessionMiddleware;
 use actix_web::{cookie::Key, web::Data, App, HttpServer};
-use engelsystem_rs_db::{connect_and_migrate, user::{add_generic_user, add_guest, get_user_count}};
+use engelsystem_rs_db::{connect_and_migrate, user::{add_guest, get_user_count}};
 use rand::{distr::Alphanumeric, Rng};
 use snafu::ResultExt;
-use tera::Tera;
-use tracing::{debug, warn};
+use tracing::warn;
 
 const DUMMY_SECRET_KEY: &[u8; 64] =
     b"7E8CDED394A2BC2EB3547B16F6C4259DFF4B8218BDA5DF224E27CE44AC999999";
 
 pub async fn run_server() -> crate::Result<()> {
-    let templates = match Tera::new("templates/*")
-        .context(TemplateErr)
-     {
-        Ok(tmpls) => tmpls,
-        Err(e) => {
-            tracing::error!("Couldn't load templates: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    for template in templates.get_template_names() {
-        debug!("loaded: {template}");
-    }
-    let shared_templates = Data::new(templates);
-
     let url = env::var("DATABASE_URL").unwrap_or_else(|_| {
         warn!("No DATABASE_URL set. Using an sqlite file in the current directory.");
         "sqlite://meow.sqlite?mode=rwc".to_string()
@@ -51,10 +34,10 @@ pub async fn run_server() -> crate::Result<()> {
         .context(DatabaseErr)?;
 
     if env::var("DUMMY_USERS").is_ok() {
-        let user_count = get_user_count(&db).await.context(DatabaseErr)?;
-        if user_count < 100 {
+        let user_amt = get_user_count(&db).await.context(DatabaseErr)?;
+        if user_amt < 100 {
             warn!("The database will be filled with dummy users");
-            for _ in  user_count..100 {
+            for _ in  user_amt..100 {
                 let mut email: String = rand::rng()
                     .sample_iter(&Alphanumeric)
                     .take(10)
@@ -92,19 +75,15 @@ pub async fn run_server() -> crate::Result<()> {
                 .build(),
             )
             .app_data(shared_db.clone())
-            .app_data(shared_templates.clone())
-            .service(landing_page)
-            .service(register_page)
-            .service(login_page)
             .service(request_register)
             .service(request_login)
             .service(request_logout)
-            .service(welcome_page)
             .service(user_list)
             .service(view_user)
-            .service(Files::new("/static", "assets"))
+            .service(view_me)
+            .service(user_count)
     })
-    .bind((Ipv4Addr::UNSPECIFIED, 8080))
+    .bind((Ipv4Addr::UNSPECIFIED, 8081))
     .context(WebserverErr)?
     .run()
     .await

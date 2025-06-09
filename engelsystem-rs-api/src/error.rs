@@ -1,4 +1,4 @@
-use actix_session::{SessionGetError, SessionInsertError};
+use actix_session::SessionInsertError;
 use actix_web::ResponseError;
 use snafu::Snafu;
 
@@ -12,16 +12,6 @@ pub enum Error {
         source: engelsystem_rs_db::Error,
     },
 
-    #[snafu(display("Templating Context Error: {source}"))]
-    Context {
-        source: tera::Error,
-    },
-
-    #[snafu(display("Templating Error: {source}"))]
-    Template {
-        source: tera::Error,
-    },
-
     #[snafu(display("Webserver Error: {source}"))]
     Webserver {
         source: std::io::Error,
@@ -32,21 +22,24 @@ pub enum Error {
         source: SessionInsertError,
     },
 
-    #[snafu(display("You are unauthorized to access this resource."))]
-    SessionUnauthenticated,
-
-    #[snafu(display("You are unauthorized to access this resource."))]
+    #[snafu(display("You are not authorized to access this resource"))]
     SessionUnauthorized,
 
-    #[snafu(display("Data from the session couldn't be deserialized: {source:?}"))]
+    #[snafu(display("You are not logged in"))]
+    SessionUnauthenticated,
+
+    #[snafu(display("Deserialize Session Error: {source}"))]
     SessionDeserialize {
-        source: SessionGetError,
+        source: actix_session::SessionGetError,
     },
 
     #[snafu(display("The given Uid ({uid}) was not valid"))]
     InvalidUid {
         uid: String,
-    }
+    },
+
+    #[snafu(display("Es existiert bereits ein Benutzer mit dieser Email"))]
+    UserExists,
 }
 
 impl ResponseError for Error {}

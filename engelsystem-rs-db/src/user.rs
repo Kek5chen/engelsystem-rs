@@ -43,7 +43,24 @@ pub async fn get_user_count(db: &DatabaseConnection) -> crate::Result<u64> {
     Ok(User::find().count(db).await?)
 }
 
-pub async fn get_user_view_by_id(uid: Uuid, db: &DatabaseConnection) -> crate::Result<Option<UserView>> {
+pub async fn get_guest_count(db: &DatabaseConnection) -> crate::Result<u64> {
+    Ok(User::find()
+        .filter(user::Column::RoleId.eq(RoleType::Guest as u32))
+        .count(db)
+        .await?)
+}
+
+pub async fn get_admin_count(db: &DatabaseConnection) -> crate::Result<u64> {
+    Ok(User::find()
+        .filter(user::Column::RoleId.eq(RoleType::Admin as u32))
+        .count(db)
+        .await?)
+}
+
+pub async fn get_user_view_by_id(
+    uid: Uuid,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<UserView>> {
     Ok(User::find_by_id(uid)
         .inner_join(Role)
         .column_as(role::Column::Name, "role")
@@ -72,10 +89,16 @@ fn verify_password(plain_password: &str, hashed_password: &str) -> bool {
         }
     };
 
-    hasher.verify_password(plain_password.as_bytes(), &hashed).is_ok()
+    hasher
+        .verify_password(plain_password.as_bytes(), &hashed)
+        .is_ok()
 }
 
-pub async fn verify_user(username: &str, plain_password: &str, db: &DatabaseConnection) -> Option<user::Model> {
+pub async fn verify_user(
+    username: &str,
+    plain_password: &str,
+    db: &DatabaseConnection,
+) -> Option<user::Model> {
     tokio::time::sleep(Duration::from_millis(rand::random_range(0..2000))).await;
 
     let user = match User::find()
@@ -109,7 +132,7 @@ pub async fn add_generic_user(
 ) -> crate::Result<user::Model> {
     let password_hash = hash_password(plain_password)?;
 
-    let model = ActiveUser {
+    let result = ActiveUser {
         username: Set(username.into()),
         role_id: Set(role as u32),
         email: Set(email.into()),
@@ -117,9 +140,17 @@ pub async fn add_generic_user(
         ..Default::default()
     }
     .insert(db)
-    .await?;
+    .await;
 
-    Ok(model)
+    match result {
+        Ok(model) => Ok(model),
+        Err(DbErr::Exec(RuntimeErr::SqlxError(sea_orm::sqlx::error::Error::Database(e))))
+            if e.is_unique_violation() =>
+        {
+            Err(Error::UserExists)
+        }
+        Err(e) => Err(e.into()),
+    }
 }
 
 #[inline]
