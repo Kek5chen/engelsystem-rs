@@ -10,6 +10,7 @@ dev-css:
 	npx tailwindcss -i ./engelsystem-rs-frontend/assets/css/base.css -o ./engelsystem-rs-frontend/assets/css/base-gen.css --watch
 
 dev:
+	npm install
 	npm run dev
 
 # Release Mode Jobs
