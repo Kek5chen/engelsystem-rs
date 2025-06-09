@@ -1,15 +1,15 @@
-use engelsystem_rs::server::run_server;
+use engelsystem_rs_frontend::server::run_server;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-use engelsystem_rs::Result;
+use engelsystem_rs_frontend::Result;
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    _ = dotenvy::dotenv();
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(EnvFilter::from_default_env())
         .init();
-
-    _ = dotenvy::dotenv();
 
     run_server().await
 }

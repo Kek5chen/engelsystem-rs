@@ -10,6 +10,9 @@ pub enum Error {
         source: sea_orm::DbErr,
     },
 
+    #[snafu(display("User with this mail already exists"))]
+    UserExists,
+
     #[snafu(display("Hashing Error"))]
     Hashing,
 }

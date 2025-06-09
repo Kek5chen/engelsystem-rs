@@ -1,25 +1,13 @@
-use actix_session::Session;
-use actix_web::{get, http::header::{self, ContentType}, post, web::{self, Data, Html}, HttpResponse, Responder};
-use engelsystem_rs_db::{user::verify_user, DatabaseConnection};
+use actix_web::{cookie::Cookie, get, http::header::{self, ContentType}, post, web::{self, Data, Form, Html}, HttpResponse, Responder};
 use serde::Deserialize;
-use snafu::IntoError;
+use snafu::{IntoError, ResultExt};
 use tera::{Context, Tera};
-use tracing::info;
-use validator::Validate;
-use zeroize::Zeroizing;
-use crate::utils::validation::*;
+
+use crate::{generated::BackendErr, Error};
 
 #[derive(Deserialize)]
 struct LoginPageData {
     created: Option<bool>,
-}
-
-#[derive(Debug, Deserialize, Validate)]
-struct LoginData {
-    #[validate(custom(function = "validate_username"))]
-    username: String,
-    #[validate(custom(function = "validate_password"))]
-    password: Zeroizing<String>,
 }
 
 #[get("/login")]
@@ -33,7 +21,7 @@ pub async fn login_page(
 
     let rendered = templates.render("login.html", &context)
         .map_err(|e| {
-            tracing::error!("Template error: {e}");
+            tracing::error!("Template error: {e:?}");
             crate::error::generated::TemplateErr.into_error(e)
         })?;
     Ok(Html::new(rendered))
@@ -41,26 +29,34 @@ pub async fn login_page(
 
 #[post("/login")]
 pub async fn request_login(
-    web::Form(data): web::Form<LoginData>,
     templates: Data<Tera>,
-    db: Data<DatabaseConnection>,
-    session: Session,
+    client: Data<reqwest::Client>,
+    Form(body): Form<serde_json::Value>,
 ) -> crate::Result<impl Responder> {
-    let user = verify_user(&data.username, &data.password, &db).await;
+    let mut context = Context::new();
+    context.insert("org", "Real Org");
 
-    if let Some(user) = user {
-        session.clear();
-        session.insert("user_id", user.id)?;
-        session.insert("role_id", user.role_id)?;
+    const LOGIN_URL: &str = "http://127.0.0.1:8081/login";
+    let response = client.post(LOGIN_URL)
+        .json(&body)
+        .send()
+        .await
+        .context(BackendErr)?;
 
-        info!("User {:?} logged in successfully", user.username);
+    if response.status().is_success() {
+        let session_id = response.cookies().find(|c| c.name() == "session-id")
+            .ok_or_else(|| Error::BackendCookieInvalid { name: "session-id".to_string() })?;
 
         return Ok(HttpResponse::SeeOther()
+            .cookie(
+                Cookie::build("session-id", session_id.value())
+                .secure(true)
+                .http_only(true)
+                .finish()
+            )
             .append_header((header::LOCATION, "/welcome"))
             .finish());
     }
-
-    info!("User {:?} failed to login.", data.username);
 
     let mut context = Context::new();
     context.insert("org", "Real Org");
@@ -68,7 +64,7 @@ pub async fn request_login(
 
     let rendered = templates.render("login.html", &context)
         .map_err(|e| {
-            tracing::error!("Template error: {e}");
+            tracing::error!("Template error: {e:?}");
             crate::error::generated::TemplateErr.into_error(e)
         })?;
 

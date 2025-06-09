@@ -22,7 +22,7 @@
       {% block fields %}{% endblock fields %}
 
       {% if errors %}
-        <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors | join(sep=", ") }}</p>
+        <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors }}</p>
       {% endif %}
     
       <input class="mt-5 hover:bg-indigo-950 cursor-pointer" type="submit" name="submit" value="Senden">

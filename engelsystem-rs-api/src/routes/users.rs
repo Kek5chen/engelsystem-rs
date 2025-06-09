@@ -1,21 +1,17 @@
 use std::str::FromStr;
 
 use actix_web::{
-    get,
-    web::{self, Data, Html}, Responder,
+    get, web::{self, Data}, HttpResponse, Responder
 };
 use engelsystem_rs_db::{
-    role::RoleType,
-    user::{get_all_user_views, get_user_view_by_id},
-    DatabaseConnection,
+    role::RoleType, user::{get_all_user_views, get_user_view_by_id}, DatabaseConnection
 };
 use snafu::ResultExt;
-use tera::{Context, Tera};
 use uuid::Uuid;
 
 use crate::{
-    authorize_middleware::{BasicAdminAuth, BasicAuthTrait, BasicUser},
-    generated::{DatabaseErr, TemplateErr},
+    authorize_middleware::{BasicAdminAuth, BasicAuthTrait, BasicGuestAuth, BasicUser},
+    generated::DatabaseErr,
     Error,
 };
 
@@ -47,26 +43,16 @@ impl BasicAuthTrait for UserViewAuth {
 
 #[get("/users")]
 pub async fn user_list(
-    templates: Data<Tera>,
     db: Data<DatabaseConnection>,
     _user: BasicUser<BasicAdminAuth>,
 ) -> crate::Result<impl Responder> {
     let users = get_all_user_views(&db).await.context(DatabaseErr)?;
-    let mut context = Context::new();
 
-    context.insert("org", "Real Org");
-    context.insert("users", &users);
-
-    Ok(Html::new(
-        templates
-            .render("user_list.html", &context)
-            .context(TemplateErr)?,
-    ))
+    Ok(HttpResponse::Ok().json(users))
 }
 
 #[get("/users/{user_id}")]
 pub async fn view_user(
-    templates: Data<Tera>,
     db: Data<DatabaseConnection>,
     _user: BasicUser<UserViewAuth>,
     user_id: web::Path<String>,
@@ -74,14 +60,25 @@ pub async fn view_user(
     let uid = user_id.into_inner();
     let uid = Uuid::from_str(&uid).map_err(|_| Error::InvalidUid { uid })?;
     let user = get_user_view_by_id(uid, &db).await.context(DatabaseErr)?;
-    let mut context = Context::new();
 
-    context.insert("org", "Real Org");
-    context.insert("user", &user);
+    Ok(HttpResponse::Ok().json(user))
+}
 
-    Ok(Html::new(
-        templates
-            .render("user_view.html", &context)
-            .context(TemplateErr)?,
-    ))
+#[get("/me")]
+pub async fn view_me(
+    db: Data<DatabaseConnection>,
+    user: BasicUser<BasicGuestAuth>,
+) -> crate::Result<impl Responder> {
+
+    let user = get_user_view_by_id(user.uid, &db).await.context(DatabaseErr)?;
+
+    Ok(
+        match user {
+            Some(user) => HttpResponse::Ok().json(&user),
+            None => {
+                tracing::error!("User session passed but user object not found");
+                HttpResponse::InternalServerError().finish()
+            }
+        }
+    )
 }
