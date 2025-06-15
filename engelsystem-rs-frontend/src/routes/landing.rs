@@ -36,12 +36,11 @@ pub async fn landing_page(
     context.insert("org", "Real Org");
     context.insert(
         "rows",
-        &json!({
-            "Benutzer": counts.total,
-            "Admins": counts.admin,
-            "Gäste": counts.guest
-
-        }),
+        &json!([
+            { "Benutzer": counts.total },
+            { "Gäste": counts.guest },
+            { "Admins": counts.admin }
+        ]),
     );
 
     let rendered = templates.render("landing.html", &context).map_err(|e| {

@@ -17,15 +17,17 @@
       <h2 class="text-xl">Instanz Statistiken:</h2>
       <table class="table-fixed text-center my-10">
         <tbody>
-          {% for key, val in rows %}
-          <tr class="text-mx flex flex-col border-1 border-y-0 border-indigo-500 mb-2">
-            <td>
-              {{ key | escape }}
-            </td>
-            <td class="float-start">
-              {{ val }}
-            </td>
-          </tr>
+          {% for obj in rows %}
+            {% for key, val in obj %}
+            <tr class="text-mx flex flex-col border-1 border-y-0 border-indigo-500 mb-2">
+              <td>
+                {{ key | escape }}
+              </td>
+              <td class="float-start">
+                {{ val }}
+              </td>
+            </tr>
+            {% endfor %}
           {% endfor %}
         </tbody>
       </table>
