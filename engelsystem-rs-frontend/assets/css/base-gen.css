@@ -237,6 +237,9 @@
   .flex-1 {
     flex: 1;
   }
+  .flex-none {
+    flex: none;
+  }
   .table-fixed {
     table-layout: fixed;
   }
@@ -251,9 +254,6 @@
   }
   .items-center {
     align-items: center;
-  }
-  .justify-center {
-    justify-content: center;
   }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
@@ -290,6 +290,9 @@
       border-color: var(--color-indigo-200);
     }
   }
+  .place-self-center {
+    place-self: center;
+  }
   .self-center {
     align-self: center;
   }
@@ -313,11 +316,24 @@
     border-block-style: var(--tw-border-style);
     border-block-width: 0px;
   }
+  .border-none {
+    --tw-border-style: none;
+    border-style: none;
+  }
   .border-indigo-500 {
     border-color: var(--color-indigo-500);
   }
   .border-indigo-950 {
     border-color: var(--color-indigo-950);
+  }
+  .bg-\[\#1e1b4e\] {
+    background-color: #1e1b4e;
+  }
+  .bg-\[\#212c85\] {
+    background-color: #212c85;
+  }
+  .bg-\[\#252169\] {
+    background-color: #252169;
   }
   .bg-indigo-900 {
     background-color: var(--color-indigo-900);
@@ -355,9 +371,6 @@
   .px-6 {
     padding-inline: calc(var(--spacing) * 6);
   }
-  .px-50 {
-    padding-inline: calc(var(--spacing) * 50);
-  }
   .py-2\.5 {
     padding-block: calc(var(--spacing) * 2.5);
   }
@@ -372,6 +385,12 @@
   }
   .py-20 {
     padding-block: calc(var(--spacing) * 20);
+  }
+  .pt-20 {
+    padding-top: calc(var(--spacing) * 20);
+  }
+  .pb-10 {
+    padding-bottom: calc(var(--spacing) * 10);
   }
   .text-center {
     text-align: center;
@@ -452,9 +471,35 @@
     --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
+  .ring-0 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .ring-1 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .ring-2 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
   .odd\:bg-indigo-800 {
     &:nth-child(odd) {
       background-color: var(--color-indigo-800);
+    }
+  }
+  .hover\:bg-\[\#1d193d\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #1d193d;
+      }
+    }
+  }
+  .hover\:bg-\[\#1e1a4d\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #1e1a4d;
+      }
     }
   }
   .hover\:bg-indigo-950 {
@@ -506,12 +551,49 @@
       outline-style: none;
     }
   }
+  .md\:flex-row {
+    @media (width >= 48rem) {
+      flex-direction: row;
+    }
+  }
+  .md\:justify-evenly {
+    @media (width >= 48rem) {
+      justify-content: space-evenly;
+    }
+  }
+  .md\:border-1 {
+    @media (width >= 48rem) {
+      border-style: var(--tw-border-style);
+      border-width: 1px;
+    }
+  }
+  .md\:pt-0 {
+    @media (width >= 48rem) {
+      padding-top: calc(var(--spacing) * 0);
+    }
+  }
+  .md\:text-left {
+    @media (width >= 48rem) {
+      text-align: left;
+    }
+  }
+  .md\:shadow-2xl {
+    @media (width >= 48rem) {
+      --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));
+      box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    }
+  }
 }
-.es-account-form input {
+.es-account-form input:not(input[type="submit"]) {
   border-radius: var(--radius-xs);
-  border-style: var(--tw-border-style);
-  border-width: 1px;
+  --tw-border-style: none;
+  border-style: none;
   padding: calc(var(--spacing) * 0.5);
+  padding-left: calc(var(--spacing) * 2);
+}
+.es-account-form input::placeholder {
+  font-size: var(--text-sm);
+  line-height: var(--tw-leading, var(--text-sm--line-height));
 }
 .es-account-form h2 {
   font-size: var(--text-2xl);

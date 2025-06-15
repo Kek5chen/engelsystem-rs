@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
-.es-account-form input {
-  @apply border-1 rounded-xs p-0.5
+.es-account-form input:not(input[type="submit"]) {
+  @apply border-none pl-2 rounded-xs p-0.5
+}
+
+.es-account-form input::placeholder {
+  @apply text-sm
 }
 
 .es-account-form h2 {

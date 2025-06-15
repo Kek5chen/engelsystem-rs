@@ -6,9 +6,9 @@
 {% endblock header %}
 
 {% block content %}
-<section class="flex justify-center align-center h-full w-full">
+<section class="flex flex-col place-self-center h-full w-full">
   <div class="bg-indigo-900 text-gray-100 es-account-form self-center">
-    <h2 class="text-center">{% block form_name %}{% endblock form_name %}</h2>
+    <h2 class="text-center pb-10">{% block form_name %}{% endblock form_name %}</h2>
 
     {% if created and not error %}
       <p class="mb-4 text-center text-sm text-teal-400">Registrierung erfolgreich. Du kannst dich jetzt anmelden.</p>
@@ -18,14 +18,14 @@
       <p class="text-red-500 mt-2.5 text-center">Nutzername und/oder Passwort falsch</p>
     {% endif %}
 
-    <form class="flex flex-col" method="post" target="_self">
+    <form class="flex flex-col gap-2" method="post" target="_self">
       {% block fields %}{% endblock fields %}
 
       {% if errors %}
         <p class="text-red-500 mt-2.5 text-center">Falsche Eingabe: {{ errors }}</p>
       {% endif %}
     
-      <input class="mt-5 hover:bg-indigo-950 cursor-pointer" type="submit" name="submit" value="Senden">
+      <input class="mt-5 hover:bg-indigo-950 ring-2 cursor-pointer" type="submit" name="submit" value="Senden">
     </form>
   </div>
 </section>
