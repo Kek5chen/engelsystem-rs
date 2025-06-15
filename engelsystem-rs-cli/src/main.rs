@@ -85,7 +85,7 @@ async fn create_dummy_users(amount: u32, db: &DatabaseConnection) {
             .map(char::from)
             .collect();
 
-        email.push_str("@engelsystem.rs");
+        email = format!("dummy-{email}@engelsystem.rs");
         add_guest(&username, &email, &password, db).await.unwrap();
     }
 }
