@@ -5,10 +5,11 @@ pub mod user;
 pub mod session;
 
 pub use error::*;
+pub use entity::user::UserView;
+pub use sea_orm::DatabaseConnection;
 
 use migration::MigratorTrait;
 use sea_orm::ConnectOptions;
-pub use sea_orm::DatabaseConnection;
 use tracing::log::LevelFilter;
 
 pub async fn connect(connection_string: &str) -> crate::Result<DatabaseConnection> {
