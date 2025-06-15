@@ -2,7 +2,12 @@ use std::env;
 
 use clap::Parser;
 use cli::EngelCli;
-use engelsystem_rs_db::{connect, role::RoleType, user::{add_guest, get_role_by_username, set_role_by_username}, DatabaseConnection};
+use engelsystem_rs_db::{
+    connect,
+    role::RoleType,
+    user::{add_guest, get_role_by_username, set_role_by_username},
+    DatabaseConnection,
+};
 use log::{info, warn};
 use rand::{distr::Alphanumeric, Rng as _};
 
@@ -39,14 +44,14 @@ async fn main() {
                     }
                 }
             }
-        },
+        }
         EngelCli::Debug(debug_cmd) => {
             use cli::DebugCmd;
 
             match debug_cmd {
                 DebugCmd::CreateDummyUsers { amount } => create_dummy_users(amount, &db).await,
             }
-        },
+        }
     }
 }
 
@@ -63,7 +68,7 @@ async fn get_role(username: &str, db: &DatabaseConnection) {
 async fn create_dummy_users(amount: u32, db: &DatabaseConnection) {
     info!("Creating {amount} random users..");
 
-    for _ in  0..amount {
+    for _ in 0..amount {
         let mut email: String = rand::rng()
             .sample_iter(&Alphanumeric)
             .take(10)
@@ -81,13 +86,6 @@ async fn create_dummy_users(amount: u32, db: &DatabaseConnection) {
             .collect();
 
         email.push_str("@engelsystem.rs");
-        add_guest(
-            &username,
-            &email,
-            &password,
-            db
-        )
-            .await
-            .unwrap();
+        add_guest(&username, &email, &password, db).await.unwrap();
     }
 }
