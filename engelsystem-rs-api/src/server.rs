@@ -5,8 +5,7 @@ use crate::routes::*;
 use crate::session_db::DbSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::{cookie::Key, web::Data, App, HttpServer};
-use engelsystem_rs_db::{connect_and_migrate, user::{add_guest, get_user_count}};
-use rand::{distr::Alphanumeric, Rng};
+use engelsystem_rs_db::connect_and_migrate;
 use snafu::ResultExt;
 use tracing::warn;
 
