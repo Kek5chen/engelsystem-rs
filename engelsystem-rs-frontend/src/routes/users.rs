@@ -1,5 +1,5 @@
 use actix_web::{
-    get, http::header, web::{self, Data, Html}, HttpRequest, Responder
+    get, web::{self, Data, Html}, HttpRequest, Responder
 };
 use snafu::ResultExt;
 use tera::{Context, Tera};
@@ -15,13 +15,13 @@ pub async fn user_list(
     client: Data<reqwest::Client>,
     req: HttpRequest,
 ) -> crate::Result<impl Responder> {
-    let Some(auth_header) = req.headers().get(header::AUTHORIZATION) else {
+    let Some(session_id) = req.cookie("session-id") else {
         return Err(Error::Unauthorized);
     };
 
     const USERS_URL: &str = "http://127.0.0.1:8081/users";
     let users: serde_json::Value = client.get(USERS_URL)
-        .header(reqwest::header::AUTHORIZATION, auth_header.to_str().map_err(|_| Error::Unauthorized)?)
+        .header(reqwest::header::COOKIE, session_id.to_string())
         .send()
         .await
         .context(BackendErr)?
@@ -33,6 +33,7 @@ pub async fn user_list(
 
     context.insert("org", "Real Org");
     context.insert("users", &users);
+    context.insert("logged_in", &true);
 
     Ok(Html::new(
         templates
@@ -48,13 +49,13 @@ pub async fn view_user(
     client: Data<reqwest::Client>,
     req: HttpRequest,
 ) -> crate::Result<impl Responder> {
-    let Some(auth_header) = req.headers().get(header::AUTHORIZATION) else {
+    let Some(session_id) = req.cookie("session-id") else {
         return Err(Error::Unauthorized);
     };
 
     const USERS_URL: &str = "http://127.0.0.1:8081/users";
     let users: serde_json::Value = client.get(format!("{USERS_URL}/{user_id}"))
-        .header(reqwest::header::AUTHORIZATION, auth_header.to_str().map_err(|_| Error::Unauthorized)?)
+        .header(reqwest::header::COOKIE, session_id.to_string())
         .send()
         .await
         .context(BackendErr)?
@@ -66,6 +67,7 @@ pub async fn view_user(
 
     context.insert("org", "Real Org");
     context.insert("user", &users);
+    context.insert("logged_in", &true);
 
     Ok(Html::new(
         templates
