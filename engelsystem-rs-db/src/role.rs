@@ -1,30 +1,32 @@
 use entity::*;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
+use strum_macros::{EnumString, FromRepr, IntoStaticStr};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Clone)]
+#[derive(
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Copy,
+    Clone,
+    Serialize,
+    Deserialize,
+    FromRepr,
+    EnumString,
+    IntoStaticStr,
+)]
+#[repr(u32)]
+#[strum(ascii_case_insensitive)]
 pub enum RoleType {
     Guest = 1,
     User = 2,
     Admin = 3,
 }
 
-impl TryFrom<u32> for RoleType {
-    type Error = ();
-
-    fn try_from(n: u32) -> Result<Self, Self::Error> {
-        match n {
-            n if n == RoleType::Guest as u32 => Ok(RoleType::Guest),
-            n if n == RoleType::User  as u32 => Ok(RoleType::User),
-            n if n == RoleType::Admin as u32 => Ok(RoleType::Admin),
-            _ => Err(())
-        }
-    }
-}
-
 impl RoleType {
     pub fn from_or_default(value: u32) -> RoleType {
-        Self::try_from(value).unwrap_or(RoleType::Guest)
+        Self::from_repr(value).unwrap_or(RoleType::Guest)
     }
 }
 

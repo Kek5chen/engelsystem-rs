@@ -13,6 +13,11 @@ pub enum Error {
     #[snafu(display("User with this mail already exists"))]
     UserExists,
 
+    #[snafu(display("There's no user with the username {username:?}"))]
+    UsernameNotFound {
+        username: String,
+    },
+
     #[snafu(display("Hashing Error"))]
     Hashing,
 }

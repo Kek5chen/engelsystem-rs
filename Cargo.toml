@@ -1,4 +1,4 @@
 [workspace]
 resolver = "3"
-members = [ "engelsystem-rs-api", "engelsystem-rs-db", "engelsystem-rs-frontend" ]
+members = [ "engelsystem-rs-api", "engelsystem-rs-cli", "engelsystem-rs-db", "engelsystem-rs-frontend" ]
 

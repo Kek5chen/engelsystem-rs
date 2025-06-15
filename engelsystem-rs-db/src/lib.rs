@@ -7,10 +7,15 @@ pub mod session;
 pub use error::*;
 
 use migration::MigratorTrait;
+use sea_orm::ConnectOptions;
 pub use sea_orm::DatabaseConnection;
+use tracing::log::LevelFilter;
 
 pub async fn connect(connection_string: &str) -> crate::Result<DatabaseConnection> {
-    Ok(sea_orm::Database::connect(connection_string).await?)
+    let mut opt = ConnectOptions::new(connection_string);
+    opt.sqlx_logging_level(LevelFilter::Debug);
+
+    Ok(sea_orm::Database::connect(opt).await?)
 }
 
 pub async fn migrate(db: DatabaseConnection) -> crate::Result<DatabaseConnection> {

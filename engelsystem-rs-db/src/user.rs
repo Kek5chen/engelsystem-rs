@@ -5,7 +5,7 @@ use argon2::password_hash::PasswordHasher;
 use argon2::{password_hash::SaltString, Argon2};
 use argon2::{PasswordHash, PasswordVerifier};
 use entity::*;
-use sea_orm::{prelude::*, ActiveValue::*, QuerySelect};
+use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, QuerySelect};
 use tracing::error;
 use user::UserView;
 
@@ -181,6 +181,45 @@ pub async fn add_admin(
     db: &DatabaseConnection,
 ) -> crate::Result<user::Model> {
     add_generic_user(username, email, plain_password, RoleType::Admin, db).await
+}
+
+pub async fn get_role_by_username(
+    username: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<RoleType> {
+    let Some(user) = User::find()
+        .filter(user::Column::Username.eq(username))
+        .one(db)
+        .await?
+    else {
+        return Err(Error::UsernameNotFound {
+            username: username.to_owned(),
+        });
+    };
+
+    Ok(RoleType::from_repr(user.role_id)
+        .expect("FIXME: Expand the logic to be able to handle custom roles"))
+}
+
+pub async fn set_role_by_username(
+    username: &str,
+    role: RoleType,
+    db: &DatabaseConnection,
+) -> crate::Result<user::Model> {
+    let Some(user) = User::find()
+        .filter(user::Column::Username.eq(username))
+        .one(db)
+        .await?
+    else {
+        return Err(Error::UsernameNotFound {
+            username: username.to_owned(),
+        });
+    };
+
+    let mut user = user.into_active_model();
+    user.role_id = Set(role as u32);
+
+    Ok(user.update(db).await?)
 }
 
 #[cfg(test)]
