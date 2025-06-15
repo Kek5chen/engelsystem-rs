@@ -33,35 +33,6 @@ pub async fn run_server() -> crate::Result<()> {
         .await
         .context(DatabaseErr)?;
 
-    if env::var("DUMMY_USERS").is_ok() {
-        let user_amt = get_user_count(&db).await.context(DatabaseErr)?;
-        if user_amt < 100 {
-            warn!("The database will be filled with dummy users");
-            for _ in  user_amt..100 {
-                let mut email: String = rand::rng()
-                    .sample_iter(&Alphanumeric)
-                    .take(10)
-                    .map(char::from)
-                    .collect();
-                let username: String = rand::rng()
-                    .sample_iter(&Alphanumeric)
-                    .take(10)
-                    .map(char::from)
-                    .collect();
-                email.push_str("@engelsystem.rs");
-                add_guest(
-                    &username,
-                    &email,
-                    "awawa",
-                    &db
-                )
-                    .await
-                    .context(DatabaseErr)?;
-            }
-        }
-        
-    }
-
     let shared_db = Data::new(db);
 
     HttpServer::new(move || {
