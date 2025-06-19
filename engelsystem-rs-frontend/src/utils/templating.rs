@@ -5,6 +5,7 @@ macro_rules! render_template {
     ) => {{
         #[allow(unused_mut)]
         let mut context = ::tera::Context::new();
+        context.insert("org", "Real Org");
 
         $(
             context.insert($data_name, $data_val);
