@@ -1,6 +1,6 @@
-use engelsystem_rs_frontend::server::run_server;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 use engelsystem_rs_frontend::Result;
+use engelsystem_rs_frontend::server::run_server;
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[actix_web::main]
 async fn main() -> Result<()> {

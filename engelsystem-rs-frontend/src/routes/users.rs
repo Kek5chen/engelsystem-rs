@@ -1,27 +1,26 @@
 use actix_web::{
-    get, web::{self, Data, Html}, HttpRequest, Responder
+    Responder, get,
+    web::{self, Data, Html},
 };
 use snafu::ResultExt;
-use tera::{Context, Tera};
+use tera::Tera;
 
 use crate::{
-    generated::{BackendErr, TemplateErr},
-    Error,
+    generated::BackendErr,
+    render_template,
+    session::{RequestSessionExt, Session},
 };
 
 #[get("/users")]
 pub async fn user_list(
     templates: Data<Tera>,
     client: Data<reqwest::Client>,
-    req: HttpRequest,
+    session: Session,
 ) -> crate::Result<impl Responder> {
-    let Some(session_id) = req.cookie("session-id") else {
-        return Err(Error::Unauthorized);
-    };
-
     const USERS_URL: &str = "http://127.0.0.1:8081/users";
-    let users: serde_json::Value = client.get(USERS_URL)
-        .header(reqwest::header::COOKIE, session_id.to_string())
+    let users: serde_json::Value = client
+        .get(USERS_URL)
+        .add_session(&session)
         .send()
         .await
         .context(BackendErr)?
@@ -29,17 +28,12 @@ pub async fn user_list(
         .await
         .context(BackendErr)?;
 
-    let mut context = Context::new();
+    let rendered = render_template!(&templates, "user_list.html", session, [
+        "users" => &users,
+        "logged_in" => &true
+    ])?;
 
-    context.insert("org", "Real Org");
-    context.insert("users", &users);
-    context.insert("logged_in", &true);
-
-    Ok(Html::new(
-        templates
-            .render("user_list.html", &context)
-            .context(TemplateErr)?,
-    ))
+    Ok(Html::new(rendered))
 }
 
 #[get("/users/{user_id}")]
@@ -47,15 +41,12 @@ pub async fn view_user(
     templates: Data<Tera>,
     user_id: web::Path<String>,
     client: Data<reqwest::Client>,
-    req: HttpRequest,
+    session: Session,
 ) -> crate::Result<impl Responder> {
-    let Some(session_id) = req.cookie("session-id") else {
-        return Err(Error::Unauthorized);
-    };
-
     const USERS_URL: &str = "http://127.0.0.1:8081/users";
-    let users: serde_json::Value = client.get(format!("{USERS_URL}/{user_id}"))
-        .header(reqwest::header::COOKIE, session_id.to_string())
+    let users: serde_json::Value = client
+        .get(format!("{USERS_URL}/{user_id}"))
+        .add_session(&session)
         .send()
         .await
         .context(BackendErr)?
@@ -63,15 +54,10 @@ pub async fn view_user(
         .await
         .context(BackendErr)?;
 
-    let mut context = Context::new();
+    let rendered = render_template!(&templates, "user_view.html", session, [
+        "user" => &users,
+        "logged_in" => &true
+    ])?;
 
-    context.insert("org", "Real Org");
-    context.insert("user", &users);
-    context.insert("logged_in", &true);
-
-    Ok(Html::new(
-        templates
-            .render("user_view.html", &context)
-            .context(TemplateErr)?,
-    ))
+    Ok(Html::new(rendered))
 }

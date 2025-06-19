@@ -1,14 +1,13 @@
 use actix_web::{
-    get,
+    Responder, get,
     web::{Data, Html},
-    Responder,
 };
 use serde::Deserialize;
 use serde_json::json;
 use snafu::{IntoError, ResultExt};
-use tera::{Context, Tera};
+use tera::Tera;
 
-use crate::generated::{BackendErr, TemplateErr};
+use crate::{generated::BackendErr, render_template};
 
 #[derive(Deserialize)]
 struct UserCountData {
@@ -32,21 +31,15 @@ pub async fn landing_page(
         .await
         .context(BackendErr)?;
 
-    let mut context = Context::new();
-    context.insert("org", "Real Org");
-    context.insert(
-        "rows",
-        &json!([
-            { "Benutzer": counts.total },
-            { "Gäste": counts.guest },
-            { "Admins": counts.admin }
-        ]),
-    );
-
-    let rendered = templates.render("landing.html", &context).map_err(|e| {
-        tracing::error!("Template error: {e:?}");
-        TemplateErr.into_error(e)
-    })?;
+    let rendered = render_template!(&templates, "landing.html", [
+        "rows" => &{
+            json!([
+                { "Benutzer": counts.total },
+                { "Gäste": counts.guest },
+                { "Admins": counts.admin }
+            ])
+        }
+    ])?;
 
     Ok(Html::new(rendered))
 }

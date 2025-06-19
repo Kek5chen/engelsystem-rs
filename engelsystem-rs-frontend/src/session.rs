@@ -1,22 +1,23 @@
 use std::{future::ready, marker::PhantomData, pin::Pin};
 
-use actix_web::{dev::Payload, FromRequest, HttpRequest};
+use actix_web::{FromRequest, HttpRequest, HttpResponseBuilder, dev::Payload};
+use reqwest::RequestBuilder;
 
-use crate::{templates::BaseData, Error};
+use crate::{Error, templates::BaseData};
 
 pub struct Public;
-pub struct EnsurePrivate;
+pub struct Authenticated;
 
 pub type PublicSession = Session<Public>;
 
-pub struct Session<A = EnsurePrivate> {
+pub struct Session<A = Authenticated> {
     session_id: Option<String>,
 
     _accessibility: PhantomData<A>,
 }
 
-impl<A> Session<A> {
-    fn new(session_id: Option<String>) -> Self {
+impl Session<Public> {
+    fn new_opt(session_id: Option<String>) -> Self {
         Session {
             session_id,
 
@@ -24,8 +25,43 @@ impl<A> Session<A> {
         }
     }
 
+    pub fn upgrade(self) -> Option<Session<Authenticated>> {
+        Some(Session::new(self.session_id?))
+    }
+}
+
+impl<A> Session<A> {
+    fn new(session_id: String) -> Self {
+        Session {
+            session_id: Some(session_id),
+
+            _accessibility: PhantomData,
+        }
+    }
+
     pub fn base_data<'a>(&self, org: &'a str) -> BaseData<'a> {
         BaseData::new(org, self.session_id.is_some())
+    }
+
+    pub fn exists(&self) -> bool {
+        self.session_id.is_some()
+    }
+
+    pub fn cookie_opt(&self) -> Option<String> {
+        self.session_id
+            .as_ref()
+            .map(|sid| format!("session-id={sid}"))
+    }
+}
+
+impl Session<Authenticated> {
+    pub fn cookie(&self) -> String {
+        format!(
+            "session-id={}",
+            self.session_id
+                .as_ref()
+                .expect("EnsurePrivate shouldn't be able to contain no session id")
+        )
     }
 }
 
@@ -39,7 +75,7 @@ impl FromRequest for Session<Public> {
     }
 }
 
-impl FromRequest for Session<EnsurePrivate> {
+impl FromRequest for Session<Authenticated> {
     type Error = Error;
 
     type Future = Pin<Box<dyn Future<Output = Result<Self, Error>>>>;
@@ -49,25 +85,65 @@ impl FromRequest for Session<EnsurePrivate> {
     }
 }
 
-
 pub trait IntoSession {
-    fn into_authenticated_session(self) -> crate::Result<Session<EnsurePrivate>>;
+    fn into_authenticated_session(self) -> crate::Result<Session<Authenticated>>;
     fn into_optional_session(self) -> Session<Public>;
 }
 
 impl IntoSession for &HttpRequest {
-    fn into_authenticated_session(self) -> crate::Result<Session<EnsurePrivate>> {
+    fn into_authenticated_session(self) -> crate::Result<Session<Authenticated>> {
         match self.cookie("session-id") {
-            Some(cookie) => Ok(Session::new(Some(cookie.value().to_string()))),
+            Some(cookie) => Ok(Session::new(cookie.value().to_string())),
             None => Err(Error::Unauthorized),
         }
     }
 
     fn into_optional_session(self) -> Session<Public> {
-        match self.cookie("session-id") {
-            Some(cookie) => Session::new(Some(cookie.value().to_string())),
-            None => Session::new(None),
-        }
+        Session::new_opt(self.cookie("session-id").map(|c| c.value().to_string()))
     }
 }
 
+pub trait ResponseSessionExt {
+    fn expire_session(&mut self) -> &mut Self;
+    fn session_cookie(&mut self, session_id: impl Into<String>) -> &mut Self;
+}
+
+impl ResponseSessionExt for HttpResponseBuilder {
+    fn expire_session(&mut self) -> &mut Self {
+        let mut expire_cookie = actix_web::cookie::Cookie::new("session-id", "");
+        expire_cookie.make_removal();
+
+        self.cookie(expire_cookie);
+
+        self
+    }
+
+    fn session_cookie(&mut self, session_id: impl Into<String>) -> &mut Self {
+        let cookie = actix_web::cookie::Cookie::build("session-id", session_id.into())
+            .secure(true)
+            .http_only(true)
+            .finish();
+
+        self.cookie(cookie)
+    }
+}
+
+pub trait RequestSessionExt {
+    fn add_session(self, session: &Session<Authenticated>) -> Self;
+}
+
+impl RequestSessionExt for RequestBuilder {
+    fn add_session(self, session: &Session<Authenticated>) -> Self {
+        self.header(reqwest::header::COOKIE, session.cookie())
+    }
+}
+
+pub trait ResponseCookieExt {
+    fn cookie<'a>(&'a self, name: &str) -> Option<reqwest::cookie::Cookie<'a>>;
+}
+
+impl ResponseCookieExt for reqwest::Response {
+    fn cookie<'a>(&'a self, name: &str) -> Option<reqwest::cookie::Cookie<'a>> {
+        self.cookies().find(|c| c.name() == name)
+    }
+}

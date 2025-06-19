@@ -3,15 +3,13 @@ use std::net::Ipv4Addr;
 use crate::error::generated::*;
 use crate::routes::*;
 use actix_files::Files;
-use actix_web::{web::Data, App, HttpServer};
+use actix_web::{App, HttpServer, web::Data};
 use snafu::ResultExt;
 use tera::Tera;
 use tracing::debug;
 
 pub async fn run_server() -> crate::Result<()> {
-    let templates = match Tera::new("templates/*")
-        .context(TemplateErr)
-     {
+    let templates = match Tera::new("templates/*").context(TemplateErr) {
         Ok(tmpls) => tmpls,
         Err(e) => {
             tracing::error!("Couldn't load templates: {e}");

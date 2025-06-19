@@ -7,10 +7,7 @@ pub struct BaseData<'a> {
 
 impl<'a> BaseData<'a> {
     pub fn new(org: &'a str, logged_in: bool) -> Self {
-        Self {
-            org,
-            logged_in,
-        }
+        Self { org, logged_in }
     }
 
     pub fn insert(self, ctx: &mut Context) {

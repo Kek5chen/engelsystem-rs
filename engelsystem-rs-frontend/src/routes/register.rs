@@ -1,20 +1,30 @@
-use actix_web::{get, http::header::{self, ContentType}, post, web::{Data, Form, Html}, HttpResponse, Responder};
+use crate::{
+    generated::BackendErr, render_template, session::PublicSession,
+    utils::response_ext::HtmlResponseExt,
+};
+use actix_web::{
+    HttpResponse, Responder, get,
+    http::header::{self},
+    post,
+    web::{Data, Form},
+};
 use snafu::{IntoError, ResultExt};
-use tera::{Context, Tera};
-use crate::{generated::{BackendErr, TemplateErr}, session::PublicSession};
+use tera::Tera;
 
 #[get("/register")]
-async fn register_page(templates: Data<Tera>, session: PublicSession) -> crate::Result<impl Responder> {
-    let mut context = Context::new();
-    session.base_data("Real Org").insert(&mut context);
+async fn register_page(
+    templates: Data<Tera>,
+    session: PublicSession,
+) -> crate::Result<impl Responder> {
+    if session.exists() {
+        return Ok(HttpResponse::SeeOther()
+            .append_header((header::LOCATION, "/welcome"))
+            .finish());
+    }
 
-    let rendered = templates.render("register.html", &context)
-        .map_err(|e| {
-            tracing::error!("Template error: {e:?}");
-            TemplateErr.into_error(e)
-        })?;
+    let rendered = render_template!(&templates, "register.html", [])?;
 
-    Ok(Html::new(rendered))
+    Ok(HttpResponse::Ok().html(rendered))
 }
 
 #[post("/register")]
@@ -24,8 +34,13 @@ async fn request_register(
     Form(body): Form<serde_json::Value>,
     session: PublicSession,
 ) -> crate::Result<impl Responder> {
+    if session.exists() {
+        return Ok(HttpResponse::BadRequest().finish());
+    }
+
     const REGISTER_URL: &str = "http://127.0.0.1:8081/register";
-    let response = client.post(REGISTER_URL)
+    let response = client
+        .post(REGISTER_URL)
         .json(&body)
         .send()
         .await
@@ -37,20 +52,9 @@ async fn request_register(
             .finish());
     }
 
-    let mut context = Context::new();
-    session.base_data("Real Org").insert(&mut context);
-
     let error = response.text().await.context(BackendErr)?;
 
-    context.insert("errors", &error);
+    let rendered = render_template!(&templates, "register.html",  [ "errors" => &error ])?;
 
-    let rendered = templates.render("register.html", &context)
-        .map_err(|e| {
-            tracing::error!("Template error: {e:?}");
-            TemplateErr.into_error(e)
-        })?;
-
-    Ok(HttpResponse::BadRequest()
-        .content_type(ContentType::html())
-        .body(rendered))
+    Ok(HttpResponse::BadRequest().html(rendered))
 }
