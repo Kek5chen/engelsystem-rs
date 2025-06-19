@@ -71,6 +71,9 @@ impl MigrationTrait for Migration {
                     .col(string_uniq(User::Email))
                     .col(string_null(User::PasswordHash))
                     .col(integer(User::RoleId))
+                    .col(string(User::FirstName).default(Expr::value("")))
+                    .col(string(User::LastName).default(Expr::value("")))
+                    .col(integer(User::Points).default(Expr::value(0)))
                     .foreign_key(&mut user_role_foreign_key)
                     .to_owned(),
             )
@@ -158,6 +161,11 @@ pub enum User {
     Email,
     PasswordHash,
     RoleId,
+
+    FirstName,
+    LastName,
+
+    Points
 }
 
 #[derive(DeriveIden)]

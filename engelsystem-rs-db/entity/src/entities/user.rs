@@ -17,6 +17,14 @@ pub struct Model {
     pub password_hash: String,
     #[sea_orm(default_value = 0)]
     pub role_id: u32,
+
+    #[sea_orm(default_value = "")]
+    pub first_name: String,
+    #[sea_orm(default_value = "")]
+    pub last_name: String,
+
+    #[sea_orm(default_value = 0)]
+    pub points: u32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -56,5 +64,10 @@ pub struct UserView {
     pub username: String,
     pub email: String,
     pub role: String,
+
+    pub first_name: String,
+    pub last_name: String,
+
+    pub points: u32,
 }
 

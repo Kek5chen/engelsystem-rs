@@ -137,6 +137,9 @@ pub async fn add_generic_user(
         role_id: Set(role as u32),
         email: Set(email.into()),
         password_hash: Set(password_hash),
+        first_name: NotSet,
+        last_name: NotSet,
+        points: NotSet,
         ..Default::default()
     }
     .insert(db)

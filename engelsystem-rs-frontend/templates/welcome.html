@@ -7,23 +7,91 @@
 
 {% block content %}
 
-<section class="w-full p-5 md:p-25 lg:p-50 lg:pt-25">
-  <h1 class="text-center text-3xl font-bold">Willkommen, {{ user.username }}!</h1>
-  <p class="text-gray-300 text-center">Schön, dich an Bord zu haben.</p>
+<section class="w-full p-5 md:p-25 lg:pt-25 flex flex-col items-center">
+  <div class="py-10">
+    <h1 class="text-center text-4xl">Willkommen, <span class="font-bold">{{ user.username }}</span>!</h1>
+    <p class="text-gray-300 text-center">Schön, dich an Bord zu haben.</p>
+  </div>
 
-  <h2 class="text2xl font-bold pt-5">Benutzer Info:</h2>
-  <table class="[&_td]:p-0.5">
-    <tbody>
-      <tr>
-        <td class="text-teal-300">User ID</td>
-        <td>{{ user.id }}</td>
-      </tr>
-      <tr>
-        <td class="text-teal-300">Rolle</td>
-        <td>{{ user.role }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="bg-[#0C1B37] rounded-4xl flex flex-col p-2 [&>div]:p-2 py-4 [&_p]:text-center md:w-[60%] mb-20">
+    <div class="flex flex-row justify-evenly">
+      <div>
+        <p class="underline text-[#C9C9C9] py-1">Name</p>
+        <p class="text-xl font-bold">{{ user.first_name }} {{user.last_name}}</p>
+      </div>
+      <div>
+        <p class="underline text-[#C9C9C9] py-1">ID</p>
+        <p class="text-xl font-bold">{{ user.id }}</p>
+      </div>
+      <div>
+        <p class="underline text-[#C9C9C9] py-1">Punkte</p>
+        <p class="text-xl font-bold">{Punkte}</p>
+      </div>
+    </div>
+    <div class="flex flex-row justify-evenly">
+      <div>
+        <p class="underline text-[#C9C9C9] py-1">Gesamte Schichtzeit</p>
+        <p class="text-xl font-bold">{Schichtzeit}</p>
+      </div>
+      <div>
+        <p class="underline text-[#C9C9C9] py-1">Naechste Schicht</p>
+        <p class="text-xl font-bold">00:00</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-between w-full gap-10 h-full">
+    <div class="bg-slate-900 shadow-lg shadow-black/50 flex-1 px-10 rounded-2xl">
+      <h1 class="text-center text-2xl py-5">Schichten</h1>
+      <table>
+        <tbody>
+          <tr>
+            <td class="font-bold pr-5">12:52</td>
+            <td>Foyer fegen</td>
+          </tr>
+          <tr>
+            <td class="font-bold pr-5">13:00</td>
+            <td>Videodreh Raum 5</td>
+          </tr>
+          <tr>
+            <td class="font-bold pr-5">14:00</td>
+            <td>Flaschen sammeln</td>
+          </tr>
+          <tr>
+            <td class="font-bold pr-5">15:00</td>
+            <td>Rezeption</td>
+          </tr>
+          <tr>
+            <td class="font-bold pr-5">16:00</td>
+            <td>Praesentation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-slate-900 shadow-lg shadow-black/50 flex-2 px-10 rounded-2xl">
+      <h1 class="text-center text-2xl py-5">Gemeinsame Erfolge</h1>
+      <div class="flex [&_p]:text-center justify-between">
+        <div>
+          <p class="underline text-[#C9C9C9] py-1">Zeit geholfen</p>
+          <p class="text-xl font-bold">1592h</p>
+        </div>
+        <div>
+          <p class="underline text-[#C9C9C9] py-1">Schichten abgeschlossen</p>
+          <p class="text-xl font-bold">149</p>
+        </div>
+        <div>
+          <p class="underline text-[#C9C9C9] py-1">Punkte verteilt</p>
+          <p class="text-xl font-bold">152099</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 shadow-lg shadow-black/50 flex-1 px-10 rounded-2xl">
+      <h1 class="text-center text-2xl py-5">Verwaltung</h1>
+      <p class="text-center">Du hast keine Verwaltungsaufgaben</p>
+    </div>
+  </div>
 </section>
 {% endblock content %}
 
