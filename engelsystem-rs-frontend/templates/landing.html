@@ -6,31 +6,25 @@
 {% endblock header %}
 
 {% block content %}
-<section class="flex items-center md:justify-evenly p-20 gap-20 w-full flex-col md:flex-row">
-  <div class="flex flex-col">
-    <h1 class="text-3xl text-gray-100 text-center md:text-left pt-20 md:pt-0">Das Moderne Engelsystem</h1>
-    <p class="text-sm text-gray-100 text-center md:text-left">Plane und verwalte reibungslos Helfer:innen und Schichten für große Events, von der Anmeldung bis zum Einsatz.</p>
+<section class="w-full md:flex-row md:mt-16 mt-32">
+  <div class="px-[10%] ">
+    <div class="my-30">
+      <h2 class="text-2xl text-gray-100 text-center md:text-left xl:w-[60%] mb-5 font-light">Plane und verwalte reibungslos Helfer:innen und Schichten für große Events, von der Anmeldung bis zum Einsatz.</h2>
+      <a href="/register"><input type="button" value="Registrieren" class="bg-[#0C1B37] w-40 h-14 mr-5 rounded-full cursor-pointer font-bold"></a>
+      <a href="/login"><input type="button" value="Anmelden" class="bg-[#0C1B37] w-40 h-14 rounded-full cursor-pointer font-bold"></a>
+    </div>
   </div>
-
-  <div class="flex-none text-center text-gray-100">
-    <div class="flex flex-col border-none md:border-1 border-indigo-950 p-10 py-20 md:shadow-2xl">
-      <h2 class="text-xl">Instanz Statistiken:</h2>
-      <table class="table-fixed text-center my-10">
-        <tbody>
-          {% for obj in rows %}
-            {% for key, val in obj %}
-            <tr class="text-mx flex flex-col border-1 border-y-0 border-indigo-500 mb-2">
-              <td>
-                {{ key | escape }}
-              </td>
-              <td class="float-start">
-                {{ val }}
-              </td>
-            </tr>
-            {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="bg-[#0C1B37] px-[10%] py-40">
+    <h2 class="text-2xl text-center pb-20 font-bold">Wer ist schon dabei?</h2>
+    <div class="flex justify-evenly">
+    {% for obj in rows %}
+      {% for key, val in obj %}
+      <div>
+        <h3 class="underline text-4xl text-center pb-5 font-bold">{{ val }}</h3>
+        <h2 class="text-center text-2xl">{{ key }}</h2>
+      </div>
+      {% endfor %}
+    {% endfor %}
     </div>
   </div>
 </section>

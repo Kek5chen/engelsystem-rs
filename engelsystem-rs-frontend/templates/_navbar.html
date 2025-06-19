@@ -1,17 +1,17 @@
 {# templates/_navbar.html #}
 
-<nav class="px-2.5 blur-2xl fixed">
-  <div class="flex mr-auto self-center">
+<nav class="md:px-[10%] fixed w-full">
+  <div class="flex md:flex-row flex-col md:mr-auto self-center py-5 md:py-0">
     <a href="/" class="self-center">
-      <h2 class="text-gray-100 text-xl self-center px-2.5">Engelsystem - {{ org }}</h3>
+      <h2 class="text-gray-100 text-xl self-center font-bold">Engelsystem - {{ org }}</h3>
     </a>
-    <div class="flex gap-2.5 ml-auto py-2.5">
+    <div class="flex gap-2.5 mx-auto md:ml-auto md:mr-0 py-2.5">
     {% if not logged_in %}
-      <a href="/register" class="text-indigo-100 px-5 py-2.5">Registrieren</a>
-      <a href="/login" class="text-indigo-100 px-5 py-2.5">Einloggen</a>
+      <a href="/register" class="text-indigo-100 pr-5 py-2.5">Registrieren</a>
+      <a href="/login" class="text-indigo-100 pl-5 py-2.5">Einloggen</a>
     </div>
     {% else %}
-      <a href="/logout" class="text-indigo-100 px-5 py-2.5">Ausloggen</a>
+      <a href="/logout" class="text-indigo-100 py-2.5">Ausloggen</a>
     {% endif %}
     </div>
   </div>
