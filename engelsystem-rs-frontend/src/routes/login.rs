@@ -3,7 +3,7 @@ use serde::Deserialize;
 use snafu::{IntoError, ResultExt};
 use tera::{Context, Tera};
 
-use crate::{generated::BackendErr, Error};
+use crate::{generated::BackendErr, session::PublicSession, Error};
 
 #[derive(Deserialize)]
 struct LoginPageData {
@@ -14,9 +14,10 @@ struct LoginPageData {
 pub async fn login_page(
     web::Query(data): web::Query<LoginPageData>,
     templates: Data<Tera>,
+    session: PublicSession, 
 ) -> crate::Result<impl Responder> {
     let mut context = Context::new();
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
     context.insert("created", &data.created.unwrap_or(false));
 
     let rendered = templates.render("login.html", &context)
@@ -32,9 +33,10 @@ pub async fn request_login(
     templates: Data<Tera>,
     client: Data<reqwest::Client>,
     Form(body): Form<serde_json::Value>,
+    session: PublicSession,
 ) -> crate::Result<impl Responder> {
     let mut context = Context::new();
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
 
     const LOGIN_URL: &str = "http://127.0.0.1:8081/login";
     let response = client.post(LOGIN_URL)
@@ -59,7 +61,7 @@ pub async fn request_login(
     }
 
     let mut context = Context::new();
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
     context.insert("error", &true);
 
     let rendered = templates.render("login.html", &context)

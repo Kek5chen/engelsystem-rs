@@ -1,12 +1,12 @@
 use actix_web::{get, http::header::{self, ContentType}, post, web::{Data, Form, Html}, HttpResponse, Responder};
 use snafu::{IntoError, ResultExt};
 use tera::{Context, Tera};
-use crate::generated::{BackendErr, TemplateErr};
+use crate::{generated::{BackendErr, TemplateErr}, session::PublicSession};
 
 #[get("/register")]
-async fn register_page(templates: Data<Tera>) -> crate::Result<impl Responder> {
+async fn register_page(templates: Data<Tera>, session: PublicSession) -> crate::Result<impl Responder> {
     let mut context = Context::new();
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
 
     let rendered = templates.render("register.html", &context)
         .map_err(|e| {
@@ -22,6 +22,7 @@ async fn request_register(
     templates: Data<Tera>,
     client: Data<reqwest::Client>,
     Form(body): Form<serde_json::Value>,
+    session: PublicSession,
 ) -> crate::Result<impl Responder> {
     const REGISTER_URL: &str = "http://127.0.0.1:8081/register";
     let response = client.post(REGISTER_URL)
@@ -37,7 +38,7 @@ async fn request_register(
     }
 
     let mut context = Context::new();
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
 
     let error = response.text().await.context(BackendErr)?;
 

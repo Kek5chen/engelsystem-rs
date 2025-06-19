@@ -3,13 +3,14 @@ use reqwest::header;
 use snafu::{IntoError, ResultExt};
 use tera::{Context, Tera};
 
-use crate::{generated::BackendErr, Error};
+use crate::{generated::BackendErr, session::Session, Error};
 
 #[get("/welcome")]
 async fn welcome_page(
     templates: Data<Tera>,
     client: Data<reqwest::Client>,
     req: HttpRequest,
+    session: Session,
 ) -> crate::Result<impl Responder> {
     let mut context = Context::new();
     
@@ -29,9 +30,8 @@ async fn welcome_page(
         .await
         .context(BackendErr)?;
 
-    context.insert("org", "Real Org");
+    session.base_data("Real Org").insert(&mut context);
     context.insert("user", &user);
-    context.insert("logged_in", &true);
 
     Ok(Html::new(
         templates.render("welcome.html", &context)
