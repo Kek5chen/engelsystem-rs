@@ -10,6 +10,9 @@ pub enum Error {
         source: sea_orm::DbErr,
     },
 
+    #[snafu(display("The requested user was not found"))]
+    UserNotFound,
+
     #[snafu(display("User with this mail already exists"))]
     UserExists,
 

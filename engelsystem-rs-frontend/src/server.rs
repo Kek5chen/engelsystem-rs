@@ -36,6 +36,8 @@ pub async fn run_server() -> crate::Result<()> {
             .service(welcome_page)
             .service(user_list)
             .service(view_user)
+            .service(settings_page)
+            .service(update_settings)
             .service(Files::new("/static", "assets"))
     })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))

@@ -52,6 +52,7 @@ pub async fn run_server() -> crate::Result<()> {
             .service(view_user)
             .service(view_me)
             .service(user_count)
+            .service(update_settings)
     })
     .bind((Ipv4Addr::UNSPECIFIED, 8081))
     .context(WebserverErr)?

@@ -7,6 +7,7 @@ pub mod session;
 pub use error::*;
 pub use entity::user::UserView;
 pub use sea_orm::DatabaseConnection;
+pub use sea_orm::ActiveValue;
 
 use migration::MigratorTrait;
 use sea_orm::ConnectOptions;

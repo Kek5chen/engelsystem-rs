@@ -5,12 +5,14 @@ use argon2::password_hash::PasswordHasher;
 use argon2::{password_hash::SaltString, Argon2};
 use argon2::{PasswordHash, PasswordVerifier};
 use entity::*;
-use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, QuerySelect};
+use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, Iterable, QuerySelect};
 use tracing::error;
 use user::UserView;
 
 use crate::role::RoleType;
 use crate::Error;
+
+pub use user::ActiveModel as ActiveUser;
 
 pub async fn get_all_guests(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
     Ok(User::find()
@@ -55,6 +57,39 @@ pub async fn get_admin_count(db: &DatabaseConnection) -> crate::Result<u64> {
         .filter(user::Column::RoleId.eq(RoleType::Admin as u32))
         .count(db)
         .await?)
+}
+
+pub async fn get_user_by_id(
+    uid: Uuid,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<user::Model>> {
+    Ok(User::find_by_id(uid).one(db).await?)
+}
+
+pub async fn update_user(
+    uid: Uuid,
+    changes: ActiveUser,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<user::Model>> {
+    let Some(user) = get_user_by_id(uid, db).await? else {
+        return Err(Error::UserNotFound);
+    };
+
+    let mut user = user.into_active_model();
+
+    for col in user::Column::iter() {
+        if let Set(new) = changes.get(col) {
+            if user.get(col).into_value().as_ref() != Some(&new) {
+                user.set(col, new);
+            }
+        }
+    }
+    
+    if user.is_changed() {
+        Ok(Some(user.update(db).await?))
+    } else {
+        Ok(None)
+    }
 }
 
 pub async fn get_user_view_by_id(

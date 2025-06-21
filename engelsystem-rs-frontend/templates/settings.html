@@ -1,0 +1,36 @@
+{# templates/settings.html #}
+{% extends "base.html" %}
+
+{% block header %}
+  {% include "_navbar.html" %}
+{% endblock header %}
+
+{% block content %}
+<section class="md:mt-16 mt-32">
+  {% block update_status %}{% endblock %}
+  <div>
+  </div>
+  <form method="post" target="_self">
+    <div>
+      <label for="username">Username</label>
+      <input name="username" type="text" value="{{ user.username }}">
+    </div>
+    <div>
+      <label for="email">Email</label>
+      <input name="email" type="email" value="{{ user.email }}">
+    </div>
+    <div>
+      <div>
+        <label for="password">Password</label>
+        <input name="password" type="password">
+      </div>
+      <div>
+        <label for="confirm_password">Confirm Password</label>
+        <input name="confirm_password" type="password">
+      </div>
+    </div>
+    <input name="delete-account" type="checkbox">
+    <input type="submit" value="Aktualisieren">
+  </form>
+</section>
+{% endblock content %}

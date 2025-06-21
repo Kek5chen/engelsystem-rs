@@ -1,0 +1,15 @@
+{# templates/settings.html #}
+{% extends "settings.html" %}
+
+{% block update_status %}
+  {% if success %}
+    <div class="text-green-400">
+      <p>Dein Benutzerprofil wurde aktualisert.</p>
+    </div>
+  {% else %}
+    <div class="text-red-400">
+      <p>Beim Aktualisieren deines Profils ist ein Fehler aufgetreten. {{ error }}.</p>
+    </div>
+  {% endif %}
+  </div>
+{% endblock %}
