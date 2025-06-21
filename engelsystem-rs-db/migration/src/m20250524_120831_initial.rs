@@ -2,6 +2,16 @@ use entity::*;
 use sea_orm::entity::*;
 use sea_orm_migration::{prelude::*, schema::*};
 
+macro_rules! drop_table {
+    ($manager:ident, $( $entity:ty ),*) => {
+        $(
+            $manager
+                .drop_table(Table::drop().table(<$entity>::Table).to_owned())
+                .await?;
+        )*
+    };
+}
+
 const ROLE_NAMES: [&str; 3] = [
     "Guest",
     "User",
@@ -20,7 +30,7 @@ pub struct Migration;
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // =============================
-        // Permissions and Roles
+        // Permission
         // =============================
 
         manager
@@ -33,6 +43,10 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        // =============================
+        // Role
+        // =============================
 
         manager
             .create_table(
@@ -53,11 +67,9 @@ impl MigrationTrait for Migration {
         // =============================
 
         let mut user_role_foreign_key = ForeignKey::create()
-            .name("FK_user_role_id")
-            .from_tbl(User::Table)
-            .from_col(User::RoleId)
-            .to_tbl(Role::Table)
-            .to_col(Role::Id)
+            .name("FK-user-role_id")
+            .from(User::Table, User::RoleId)
+            .to(Role::Table, Role::Id)
             .to_owned();
 
         manager
@@ -93,22 +105,158 @@ impl MigrationTrait for Migration {
                     .col(date_time_null(Session::ExpiresAt))
                     .to_owned()
             )
+            .await?;
+
+        // ============================
+        // Angel Type
+        // ============================
+        
+        manager
+            .create_table(
+                Table::create()
+                    .table(AngelType::Table)
+                    .if_not_exists()
+                    .col(pk_auto(AngelType::Id).primary_key())
+                    .col(string_uniq(AngelType::Name))
+                    .col(boolean(AngelType::NeedsIntroduction))
+                    .to_owned()
+            )
+            .await?;
+
+        // ============================
+        // Shift
+        // ============================
+
+        let mut shift_angel_type = ForeignKey::create()
+            .name("FK-shift-angel_type")
+            .from(Shift::Table, Shift::AngelTypeId)
+            .to(AngelType::Table, AngelType::Id)
+            .to_owned();
+        
+        manager
+            .create_table(
+                Table::create()
+                    .table(Shift::Table)
+                    .if_not_exists()
+                    .col(uuid(Shift::Id).primary_key())
+                    .col(timestamp(Shift::Created).default(Expr::current_timestamp()))
+                    .col(timestamp(Shift::StartsAt))
+                    .col(timestamp(Shift::EndsAt))
+                    .col(string(Shift::Name))
+                    .col(string_null(Shift::Description))
+                    .col(integer(Shift::AngelsNeeded))
+                    .col(integer(Shift::AngelTypeId))
+                    .foreign_key(&mut shift_angel_type)
+                    .to_owned()
+            )
+            .await?;
+
+        // ============================
+        // User Shift
+        // ============================
+
+        let mut user_shift_user = ForeignKey::create()
+            .name("FK-user_shift-user")
+            .from(UserShift::Table, UserShift::UserId)
+            .to(User::Table, User::Id)
+            .to_owned();
+
+        let mut user_shift_shift = ForeignKey::create()
+            .name("FK-user_shift-shift")
+            .from(UserShift::Table, UserShift::ShiftId)
+            .to(Shift::Table, Shift::Id)
+            .to_owned();
+        
+        manager
+            .create_table(
+                Table::create()
+                    .table(UserShift::Table)
+                    .if_not_exists()
+                    .col(uuid(UserShift::UserId))
+                    .col(integer(UserShift::ShiftId))
+                    .primary_key(Index::create().col(UserShift::UserId).col(UserShift::ShiftId))
+                    .foreign_key(&mut user_shift_user)
+                    .foreign_key(&mut user_shift_shift)
+                    .to_owned()
+            )
+            .await?;
+
+        // ============================
+        // Role -> Permission
+        // ============================
+
+        let mut role_permission_user = ForeignKey::create()
+            .name("FK-role_permission-user")
+            .from(RolePermission::Table, RolePermission::RoleId)
+            .to(Role::Table, Role::Id)
+            .to_owned();
+
+        let mut role_permission_permission = ForeignKey::create()
+            .name("FK-role_permission-permission")
+            .from(RolePermission::Table, RolePermission::PermissionId)
+            .to(Permission::Table, Permission::Id)
+            .to_owned();
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(RolePermission::Table)
+                    .if_not_exists()
+                    .col(integer(RolePermission::RoleId))
+                    .col(integer(RolePermission::PermissionId))
+                    .col(boolean(RolePermission::Enabled))
+                    .primary_key(Index::create().col(RolePermission::RoleId).col(RolePermission::PermissionId))
+                    .foreign_key(&mut role_permission_user)
+                    .foreign_key(&mut role_permission_permission)
+                    .to_owned()
+            )
+            .await?;
+
+        // ============================
+        // User -> Angel Type
+        // ============================
+
+        let mut user_angel_type_user = ForeignKey::create()
+            .name("FK-user_angel_type-user")
+            .from(UserAngelType::Table, UserAngelType::UserId)
+            .to(User::Table, User::Id)
+            .to_owned();
+
+        let mut user_angel_type_angel_type = ForeignKey::create()
+            .name("FK-user_angel_type-angel_type")
+            .from(UserAngelType::Table, UserAngelType::AngelTypeId)
+            .to(AngelType::Table, AngelType::Id)
+            .to_owned();
+        
+        manager
+            .create_table(
+                Table::create()
+                    .table(UserAngelType::Table)
+                    .if_not_exists()
+                    .col(uuid(UserAngelType::UserId))
+                    .col(integer(UserAngelType::AngelTypeId))
+                    .primary_key(Index::create().col(UserAngelType::UserId).col(UserAngelType::AngelTypeId))
+                    .foreign_key(&mut user_angel_type_user)
+                    .foreign_key(&mut user_angel_type_angel_type)
+                    .to_owned()
+            )
             .await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .drop_table(Table::drop().table(User::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(Permission::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(Role::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(Session::Table).to_owned())
-            .await
+        drop_table!(manager, 
+            User,
+            Permission,
+            Role,
+            Session,
+            AngelType,
+            Shift,
+            UserShift,
+            RolePermission,
+            UserAngelType
+        );
+
+        Ok(())
     }
 }
 
@@ -174,4 +322,47 @@ pub enum Session {
     Id,
     Data,
     ExpiresAt,
+}
+
+#[derive(DeriveIden)]
+pub enum Shift {
+    Table,
+    Id,
+    Created,
+    StartsAt,
+    EndsAt,
+    Name,
+    Description,
+    AngelsNeeded,
+    AngelTypeId,
+}
+
+#[derive(DeriveIden)]
+pub enum UserShift {
+    Table,
+    UserId,
+    ShiftId,
+}
+
+#[derive(DeriveIden)]
+pub enum AngelType {
+    Table,
+    Id,
+    Name,
+    NeedsIntroduction,
+}
+
+#[derive(DeriveIden)]
+pub enum RolePermission {
+    Table,
+    RoleId,
+    PermissionId,
+    Enabled,
+}
+
+#[derive(DeriveIden)]
+pub enum UserAngelType {
+    Table,
+    UserId,
+    AngelTypeId,
 }

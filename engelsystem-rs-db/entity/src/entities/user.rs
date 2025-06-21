@@ -9,7 +9,7 @@ use serde::Serialize;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created: DateTimeLocal,
+    pub created: DateTimeUtc,
     #[sea_orm(unique_key)]
     pub username: String,
     #[sea_orm(unique_key)]
@@ -60,7 +60,7 @@ impl ActiveModelBehavior for ActiveModel {
 #[derive(FromQueryResult, Serialize, Debug)]
 pub struct UserView {
     pub id: Uuid,
-    pub created: DateTimeLocal,
+    pub created: DateTimeUtc,
     pub username: String,
     pub email: String,
     pub role: String,
