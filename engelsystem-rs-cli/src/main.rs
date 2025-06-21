@@ -114,7 +114,7 @@ impl UserList {
         .map(|u| {
             [
                 u.id.to_string(),
-                u.created.to_string(),
+                u.created_at.to_string(),
                 u.username.to_string(),
                 u.email.to_string(),
                 u.role.to_string(),
