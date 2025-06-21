@@ -8,6 +8,7 @@ use time::OffsetDateTime;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
+    pub created_at: DateTimeUtc,
     #[sea_orm(nullable)]
     pub data: String,
     #[sea_orm(nullable)]

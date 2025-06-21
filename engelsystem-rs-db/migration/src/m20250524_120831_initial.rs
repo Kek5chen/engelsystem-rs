@@ -78,13 +78,11 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(pk_uuid(User::Id))
-                    .col(timestamp(User::Created).default(Expr::current_timestamp()))
+                    .col(timestamp(User::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_uniq(User::Username))
                     .col(string_uniq(User::Email))
                     .col(string_null(User::PasswordHash))
                     .col(integer(User::RoleId))
-                    .col(string(User::FirstName).default(Expr::value("")))
-                    .col(string(User::LastName).default(Expr::value("")))
                     .col(integer(User::Points).default(Expr::value(0)))
                     .foreign_key(&mut user_role_foreign_key)
                     .to_owned(),
@@ -101,6 +99,7 @@ impl MigrationTrait for Migration {
                     .table(Session::Table)
                     .if_not_exists()
                     .col(string_len(Session::Id, 4064).primary_key())
+                    .col(timestamp(Session::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_null(Session::Data))
                     .col(date_time_null(Session::ExpiresAt))
                     .to_owned()
@@ -117,6 +116,7 @@ impl MigrationTrait for Migration {
                     .table(AngelType::Table)
                     .if_not_exists()
                     .col(pk_auto(AngelType::Id).primary_key())
+                    .col(timestamp(AngelType::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_uniq(AngelType::Name))
                     .col(boolean(AngelType::NeedsIntroduction))
                     .to_owned()
@@ -132,6 +132,12 @@ impl MigrationTrait for Migration {
             .from(Shift::Table, Shift::AngelTypeId)
             .to(AngelType::Table, AngelType::Id)
             .to_owned();
+
+        let mut shift_managed_by = ForeignKey::create()
+            .name("FK-shift-managed_by")
+            .from(Shift::Table, Shift::ManagedBy)
+            .to(User::Table, User::Id)
+            .to_owned();
         
         manager
             .create_table(
@@ -139,7 +145,8 @@ impl MigrationTrait for Migration {
                     .table(Shift::Table)
                     .if_not_exists()
                     .col(uuid(Shift::Id).primary_key())
-                    .col(timestamp(Shift::Created).default(Expr::current_timestamp()))
+                    .col(timestamp(Shift::CreatedAt).default(Expr::current_timestamp()))
+                    .col(uuid(Shift::ManagedBy))
                     .col(timestamp(Shift::StartsAt))
                     .col(timestamp(Shift::EndsAt))
                     .col(string(Shift::Name))
@@ -147,12 +154,13 @@ impl MigrationTrait for Migration {
                     .col(integer(Shift::AngelsNeeded))
                     .col(integer(Shift::AngelTypeId))
                     .foreign_key(&mut shift_angel_type)
+                    .foreign_key(&mut shift_managed_by)
                     .to_owned()
             )
             .await?;
 
         // ============================
-        // User Shift
+        // User -> Shift
         // ============================
 
         let mut user_shift_user = ForeignKey::create()
@@ -304,14 +312,11 @@ pub enum Role {
 pub enum User {
     Table,
     Id,
-    Created,
+    CreatedAt,
     Username,
     Email,
     PasswordHash,
     RoleId,
-
-    FirstName,
-    LastName,
 
     Points
 }
@@ -320,6 +325,7 @@ pub enum User {
 pub enum Session {
     Table,
     Id,
+    CreatedAt,
     Data,
     ExpiresAt,
 }
@@ -328,7 +334,8 @@ pub enum Session {
 pub enum Shift {
     Table,
     Id,
-    Created,
+    CreatedAt,
+    ManagedBy,
     StartsAt,
     EndsAt,
     Name,
@@ -348,6 +355,7 @@ pub enum UserShift {
 pub enum AngelType {
     Table,
     Id,
+    CreatedAt,
     Name,
     NeedsIntroduction,
 }

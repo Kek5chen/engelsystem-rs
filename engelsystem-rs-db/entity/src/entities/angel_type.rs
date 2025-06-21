@@ -8,6 +8,7 @@ use sea_orm::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = true)]
     pub id: u32,
+    pub created_at: DateTimeUtc,
     pub name: String,
     pub needs_introduction: bool,
 }
