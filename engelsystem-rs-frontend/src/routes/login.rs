@@ -9,7 +9,7 @@ use snafu::ResultExt;
 use tera::Tera;
 
 use crate::{
-    generated::BackendErr, render_template, session::{PublicSession, ResponseCookieExt, ResponseSessionExt}, utils::response_ext::HtmlResponseExt, Error
+    generated::BackendErr, render_template, session::{PublicSession, ResponseCookieExt}, utils::response_ext::ActixResponseExt, Error
 };
 
 #[derive(Deserialize)]

@@ -63,7 +63,7 @@ impl MigrationTrait for Migration {
         seed_roles(manager.get_connection()).await?;
 
         // =============================
-        // Users
+        // User
         // =============================
 
         let mut user_role_foreign_key = ForeignKey::create()

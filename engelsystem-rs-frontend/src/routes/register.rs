@@ -1,6 +1,6 @@
 use crate::{
     generated::BackendErr, render_template, session::PublicSession,
-    utils::response_ext::HtmlResponseExt,
+    utils::response_ext::ActixResponseExt,
 };
 use actix_web::{
     HttpResponse, Responder, get,

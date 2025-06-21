@@ -1,6 +1,6 @@
 use std::{future::ready, marker::PhantomData, pin::Pin};
 
-use actix_web::{FromRequest, HttpRequest, HttpResponseBuilder, dev::Payload};
+use actix_web::{FromRequest, HttpRequest, dev::Payload};
 use reqwest::RequestBuilder;
 
 use crate::{Error, templates::BaseData};
@@ -100,31 +100,6 @@ impl IntoSession for &HttpRequest {
 
     fn into_optional_session(self) -> Session<Public> {
         Session::new_opt(self.cookie("session-id").map(|c| c.value().to_string()))
-    }
-}
-
-pub trait ResponseSessionExt {
-    fn expire_session(&mut self) -> &mut Self;
-    fn session_cookie(&mut self, session_id: impl Into<String>) -> &mut Self;
-}
-
-impl ResponseSessionExt for HttpResponseBuilder {
-    fn expire_session(&mut self) -> &mut Self {
-        let mut expire_cookie = actix_web::cookie::Cookie::new("session-id", "");
-        expire_cookie.make_removal();
-
-        self.cookie(expire_cookie);
-
-        self
-    }
-
-    fn session_cookie(&mut self, session_id: impl Into<String>) -> &mut Self {
-        let cookie = actix_web::cookie::Cookie::build("session-id", session_id.into())
-            .secure(true)
-            .http_only(true)
-            .finish();
-
-        self.cookie(cookie)
     }
 }
 

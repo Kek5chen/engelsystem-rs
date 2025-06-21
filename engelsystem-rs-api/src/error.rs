@@ -1,5 +1,5 @@
 use actix_session::SessionInsertError;
-use actix_web::ResponseError;
+use actix_web::{http::StatusCode, ResponseError};
 use snafu::Snafu;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -42,4 +42,13 @@ pub enum Error {
     UserExists,
 }
 
-impl ResponseError for Error {}
+impl ResponseError for Error {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            Error::SessionUnauthorized => StatusCode::FORBIDDEN,
+            Error::SessionUnauthenticated => StatusCode::UNAUTHORIZED,
+            Error::InvalidUid { .. } => StatusCode::NOT_FOUND,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}

@@ -3,7 +3,7 @@ use snafu::ResultExt;
 
 use crate::{
     generated::BackendErr,
-    session::{PublicSession, RequestSessionExt, ResponseSessionExt},
+    session::{PublicSession, RequestSessionExt}, utils::response_ext::ActixResponseExt,
 };
 
 #[get("/logout")]

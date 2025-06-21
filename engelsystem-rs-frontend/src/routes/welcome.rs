@@ -1,12 +1,15 @@
 use actix_web::{
-    Responder, get,
-    web::{Data, Html},
+    get,
+    web::Data,
+    HttpResponse, Responder,
 };
+use engelsystem_rs_db::UserView;
 use reqwest::header;
-use snafu::ResultExt;
 use tera::Tera;
 
-use crate::{generated::BackendErr, render_template, session::Session};
+use crate::{
+    render_template, session::Session, utils::response_ext::ActixResponseExt,
+};
 
 #[get("/welcome")]
 async fn welcome_page(
@@ -15,19 +18,16 @@ async fn welcome_page(
     session: Session,
 ) -> crate::Result<impl Responder> {
     const USER_URL: &str = "http://127.0.0.1:8081/me";
-    let user: serde_json::Value = client
+    let user: UserView = client
         .get(USER_URL)
         .header(header::COOKIE, session.cookie())
         .send()
-        .await
-        .context(BackendErr)?
-        .error_for_status()
-        .context(BackendErr)?
+        .await?
+        .error_for_status()?
         .json()
-        .await
-        .context(BackendErr)?;
+        .await?;
 
-    Ok(Html::new(
-        render_template!(&templates, "welcome.html", session, [ "user" => &user ])?,
-    ))
+
+    Ok(HttpResponse::Ok()
+        .html(render_template!(&templates, "welcome.html", session, [ "user" => &user ])?))
 }
