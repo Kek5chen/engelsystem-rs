@@ -3,12 +3,14 @@ pub mod permission;
 pub mod role;
 pub mod user;
 pub mod session;
+pub mod shift;
 
 pub use error::*;
-pub use entity::user::UserView;
 pub use sea_orm::DatabaseConnection;
 pub use sea_orm::DatabaseConnection as Database;
 pub use sea_orm::ActiveValue;
+
+pub use entity::public::*;
 
 use migration::MigratorTrait;
 use sea_orm::ConnectOptions;

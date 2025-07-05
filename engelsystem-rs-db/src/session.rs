@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use entity::{ActiveSession, Session};
+use entity::intern::*;
 use rand::distr::Alphanumeric;
 use rand::Rng;
 use sea_orm::ActiveValue::{NotSet, Set};
@@ -75,7 +75,7 @@ pub async fn save_session(
         .map(char::from)
         .collect();
 
-    ActiveSession {
+    session::ActiveModel {
         id: Set(session_key.clone()),
         created_at: NotSet,
         data: Set(data),

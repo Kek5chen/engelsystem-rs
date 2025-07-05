@@ -1,4 +1,4 @@
-use entity::*;
+use entity::intern::*;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumString, FromRepr, IntoStaticStr};
@@ -27,6 +27,10 @@ pub enum RoleType {
 impl RoleType {
     pub fn from_or_default(value: u32) -> RoleType {
         Self::from_repr(value).unwrap_or(RoleType::Guest)
+    }
+
+    pub fn is_bypass(&self) -> bool {
+        *self == RoleType::Admin
     }
 }
 

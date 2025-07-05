@@ -12,7 +12,20 @@ pub struct Model {
 }
 
 #[derive(Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::user::Entity",
+        from = "Column::UserId",
+        to = "super::user::Column::Id",
+    )]
+    User,
+    #[sea_orm(
+        belongs_to = "super::shift::Entity",
+        from = "Column::ShiftId",
+        to = "super::shift::Column::Id",
+    )]
+    Shift,
+}
 
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {}

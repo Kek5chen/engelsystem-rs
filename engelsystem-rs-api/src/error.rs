@@ -40,6 +40,16 @@ pub enum Error {
 
     #[snafu(display("Es existiert bereits ein Benutzer mit dieser Email"))]
     UserExists,
+
+    #[snafu(display("Es konnte keine Nutzer mit dem Name {name:?} gefunden werden"))]
+    UserNotFound {
+        name: String
+    },
+
+    #[snafu(display("Der Engeltyp {name:?} existiert nicht"))]
+    AngelTypeNotFound {
+        name: String
+    },
 }
 
 impl ResponseError for Error {

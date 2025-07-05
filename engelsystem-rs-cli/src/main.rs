@@ -141,7 +141,7 @@ impl UserList {
                 }
 
                 match key.code {
-                    KeyCode::Esc => break,
+                    KeyCode::Esc | KeyCode::Char('q') => break,
 
                     KeyCode::Char('j') | KeyCode::Down => self.next_row(),
                     KeyCode::Char('k') | KeyCode::Up => self.previous_row(),

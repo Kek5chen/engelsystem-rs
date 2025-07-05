@@ -4,15 +4,14 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::PasswordHasher;
 use argon2::{password_hash::SaltString, Argon2};
 use argon2::{PasswordHash, PasswordVerifier};
-use entity::*;
-use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, Iterable, QuerySelect};
+use entity::public::{self};
+use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, Iterable, QuerySelect, SelectColumns};
+use snafu::ResultExt;
 use tracing::error;
-use user::UserView;
 
 use crate::role::RoleType;
 use crate::Error;
-
-pub use user::ActiveModel as ActiveUser;
+use entity::intern::*;
 
 pub async fn get_all_guests(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
     Ok(User::find()
@@ -32,11 +31,11 @@ pub async fn get_all_admins(db: &DatabaseConnection) -> crate::Result<Vec<user::
         .await?)
 }
 
-pub async fn get_all_user_views(db: &DatabaseConnection) -> crate::Result<Vec<user::UserView>> {
+pub async fn get_all_user_views(db: &DatabaseConnection) -> crate::Result<Vec<user::View>> {
     Ok(User::find()
         .inner_join(Role)
         .column_as(role::Column::Name, "role")
-        .into_model::<UserView>()
+        .into_model::<user::View>()
         .all(db)
         .await?)
 }
@@ -66,9 +65,45 @@ pub async fn get_user_by_id(
     Ok(User::find_by_id(uid).one(db).await?)
 }
 
+pub async fn get_user_by_name(
+    name: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<user::Model>> {
+    Ok(User::find()
+        .filter(user::Column::Username.eq(name))
+        .one(db)
+        .await?)
+}
+
+pub async fn get_user_id_by_name(
+    name: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<Uuid>> {
+    Ok(User::find()
+        .filter(user::Column::Username.eq(name))
+        .select_only()
+        .column(user::Column::Id)
+        .into_tuple()
+        .one(db)
+        .await?)
+}
+
+pub async fn get_angel_type_id_by_name(
+    name: &str,
+    db: &DatabaseConnection,
+) -> crate::Result<Option<u32>> {
+    Ok(AngelType::find()
+        .filter(angel_type::Column::Name.eq(name))
+        .select_only()
+        .column(angel_type::Column::Id)
+        .into_tuple()
+        .one(db)
+        .await?)
+}
+
 pub async fn update_user(
     uid: Uuid,
-    changes: ActiveUser,
+    changes: public::ActiveUser,
     db: &DatabaseConnection,
 ) -> crate::Result<Option<user::Model>> {
     let Some(user) = get_user_by_id(uid, db).await? else {
@@ -84,7 +119,7 @@ pub async fn update_user(
             }
         }
     }
-    
+
     if user.is_changed() {
         Ok(Some(user.update(db).await?))
     } else {
@@ -95,11 +130,11 @@ pub async fn update_user(
 pub async fn get_user_view_by_id(
     uid: Uuid,
     db: &DatabaseConnection,
-) -> crate::Result<Option<UserView>> {
+) -> crate::Result<Option<public::UserView>> {
     Ok(User::find_by_id(uid)
         .inner_join(Role)
         .column_as(role::Column::Name, "role")
-        .into_model::<UserView>()
+        .into_model::<public::UserView>()
         .one(db)
         .await?)
 }
@@ -167,7 +202,18 @@ pub async fn add_generic_user(
 ) -> crate::Result<user::Model> {
     let password_hash = hash_password(plain_password)?;
 
-    let result = ActiveUser {
+    let member_id: Option<u32> = User::find()
+        .select_only()
+        .expr(Expr::col(user::Column::MemberId).max())
+        .into_tuple()
+        .one(db)
+        .await?
+        .unwrap_or(None);
+
+    let member_id = member_id.unwrap_or(0) + 1;
+
+    let result = user::ActiveModel {
+        member_id: Set(member_id),
         username: Set(username.into()),
         role_id: Set(role as u32),
         email: Set(email.into()),

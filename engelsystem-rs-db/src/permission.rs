@@ -1,4 +1,4 @@
-use entity::*;
+use entity::intern::*;
 use sea_orm::prelude::*;
 
 pub async fn get_perm_count(db: &DatabaseConnection) -> crate::Result<u64> {

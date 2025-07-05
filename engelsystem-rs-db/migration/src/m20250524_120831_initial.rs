@@ -1,4 +1,4 @@
-use entity::*;
+use entity::intern::*;
 use sea_orm::entity::*;
 use sea_orm_migration::{prelude::*, schema::*};
 
@@ -12,16 +12,9 @@ macro_rules! drop_table {
     };
 }
 
-const ROLE_NAMES: [&str; 3] = [
-    "Guest",
-    "User",
-    "Administrator",
-];
+const ROLE_NAMES: [&str; 3] = ["Guest", "User", "Administrator"];
 
-const PERMISSION_NAMES: [&str; 2] = [
-    "AddUser",
-    "DeleteUser",
-];
+const PERMISSION_NAMES: [&str; 2] = ["AddUser", "DeleteUser"];
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -78,6 +71,7 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(pk_uuid(User::Id))
+                    .col(integer_uniq(User::MemberId))
                     .col(timestamp(User::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_uniq(User::Username))
                     .col(string_uniq(User::Email))
@@ -92,7 +86,7 @@ impl MigrationTrait for Migration {
         // ============================
         // Session
         // ============================
-        
+
         manager
             .create_table(
                 Table::create()
@@ -102,14 +96,14 @@ impl MigrationTrait for Migration {
                     .col(timestamp(Session::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_null(Session::Data))
                     .col(date_time_null(Session::ExpiresAt))
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
 
         // ============================
         // Angel Type
         // ============================
-        
+
         manager
             .create_table(
                 Table::create()
@@ -119,7 +113,7 @@ impl MigrationTrait for Migration {
                     .col(timestamp(AngelType::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_uniq(AngelType::Name))
                     .col(boolean(AngelType::NeedsIntroduction))
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
 
@@ -138,7 +132,13 @@ impl MigrationTrait for Migration {
             .from(Shift::Table, Shift::ManagedBy)
             .to(User::Table, User::Id)
             .to_owned();
-        
+
+        let mut shift_created_by = ForeignKey::create()
+            .name("FK-shift-created_by")
+            .from(Shift::Table, Shift::CreatedBy)
+            .to(User::Table, User::Id)
+            .to_owned();
+
         manager
             .create_table(
                 Table::create()
@@ -146,7 +146,8 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(Shift::Id).primary_key())
                     .col(timestamp(Shift::CreatedAt).default(Expr::current_timestamp()))
-                    .col(uuid(Shift::ManagedBy))
+                    .col(uuid(Shift::CreatedBy))
+                    .col(uuid_null(Shift::ManagedBy))
                     .col(timestamp(Shift::StartsAt))
                     .col(timestamp(Shift::EndsAt))
                     .col(string(Shift::Name))
@@ -155,7 +156,8 @@ impl MigrationTrait for Migration {
                     .col(integer(Shift::AngelTypeId))
                     .foreign_key(&mut shift_angel_type)
                     .foreign_key(&mut shift_managed_by)
-                    .to_owned()
+                    .foreign_key(&mut shift_created_by)
+                    .to_owned(),
             )
             .await?;
 
@@ -174,7 +176,7 @@ impl MigrationTrait for Migration {
             .from(UserShift::Table, UserShift::ShiftId)
             .to(Shift::Table, Shift::Id)
             .to_owned();
-        
+
         manager
             .create_table(
                 Table::create()
@@ -182,10 +184,14 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(UserShift::UserId))
                     .col(integer(UserShift::ShiftId))
-                    .primary_key(Index::create().col(UserShift::UserId).col(UserShift::ShiftId))
+                    .primary_key(
+                        Index::create()
+                            .col(UserShift::UserId)
+                            .col(UserShift::ShiftId),
+                    )
                     .foreign_key(&mut user_shift_user)
                     .foreign_key(&mut user_shift_shift)
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
 
@@ -213,10 +219,14 @@ impl MigrationTrait for Migration {
                     .col(integer(RolePermission::RoleId))
                     .col(integer(RolePermission::PermissionId))
                     .col(boolean(RolePermission::Enabled))
-                    .primary_key(Index::create().col(RolePermission::RoleId).col(RolePermission::PermissionId))
+                    .primary_key(
+                        Index::create()
+                            .col(RolePermission::RoleId)
+                            .col(RolePermission::PermissionId),
+                    )
                     .foreign_key(&mut role_permission_user)
                     .foreign_key(&mut role_permission_permission)
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
 
@@ -235,7 +245,7 @@ impl MigrationTrait for Migration {
             .from(UserAngelType::Table, UserAngelType::AngelTypeId)
             .to(AngelType::Table, AngelType::Id)
             .to_owned();
-        
+
         manager
             .create_table(
                 Table::create()
@@ -243,16 +253,21 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(UserAngelType::UserId))
                     .col(integer(UserAngelType::AngelTypeId))
-                    .primary_key(Index::create().col(UserAngelType::UserId).col(UserAngelType::AngelTypeId))
+                    .primary_key(
+                        Index::create()
+                            .col(UserAngelType::UserId)
+                            .col(UserAngelType::AngelTypeId),
+                    )
                     .foreign_key(&mut user_angel_type_user)
                     .foreign_key(&mut user_angel_type_angel_type)
-                    .to_owned()
+                    .to_owned(),
             )
             .await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        drop_table!(manager, 
+        drop_table!(
+            manager,
             User,
             Permission,
             Role,
@@ -270,7 +285,7 @@ impl MigrationTrait for Migration {
 
 async fn seed_permissions(conn: &SchemaManagerConnection<'_>) -> Result<(), DbErr> {
     for permission in PERMISSION_NAMES {
-        ActivePermission {
+        permission::ActiveModel {
             id: NotSet,
             name: Set(permission.to_string()),
         }
@@ -283,7 +298,7 @@ async fn seed_permissions(conn: &SchemaManagerConnection<'_>) -> Result<(), DbEr
 
 async fn seed_roles(conn: &SchemaManagerConnection<'_>) -> Result<(), DbErr> {
     for role in ROLE_NAMES {
-        ActiveRole {
+        role::ActiveModel {
             id: NotSet,
             name: Set(role.to_string()),
         }
@@ -312,13 +327,14 @@ pub enum Role {
 pub enum User {
     Table,
     Id,
+    MemberId,
     CreatedAt,
     Username,
     Email,
     PasswordHash,
     RoleId,
 
-    Points
+    Points,
 }
 
 #[derive(DeriveIden)]
@@ -335,6 +351,7 @@ pub enum Shift {
     Table,
     Id,
     CreatedAt,
+    CreatedBy,
     ManagedBy,
     StartsAt,
     EndsAt,

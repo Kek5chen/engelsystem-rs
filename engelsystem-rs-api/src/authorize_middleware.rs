@@ -70,7 +70,7 @@ impl<A: BasicAuthTrait> FromRequest for BasicUser<A> {
 pub struct BasicAdminAuth(());
 impl BasicAuthTrait for BasicAdminAuth {
     async fn authenticate(user: BasicUser<Self>, _req: HttpRequest) -> crate::Result<BasicUser<Self>> {
-        if user.role == RoleType::Admin {
+        if user.role.is_bypass() {
             Ok(user)
         } else {
             Err(Error::SessionUnauthorized)
@@ -82,7 +82,7 @@ impl BasicAuthTrait for BasicAdminAuth {
 pub struct BasicUserAuth(());
 impl BasicAuthTrait for BasicUserAuth {
     async fn authenticate(user: BasicUser<Self>, _req: HttpRequest) -> crate::Result<BasicUser<Self>> {
-        if user.role == RoleType::User {
+        if user.role.is_bypass() || user.role == RoleType::User {
             Ok(user)
         } else {
             Err(Error::SessionUnauthorized)

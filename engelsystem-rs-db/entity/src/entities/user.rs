@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
+    pub member_id: u32,
     pub created_at: DateTimeUtc,
     #[sea_orm(unique_key)]
     pub username: String,
@@ -38,6 +39,16 @@ impl Related<super::role::Entity> for Entity {
     }
 }
 
+impl Related<super::shift::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::user_shift::Relation::Shift.def()
+    }
+
+    fn via() -> Option<RelationDef> {
+        Some(super::user_shift::Relation::User.def())
+    }
+}
+
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {
     async fn before_save<C>(mut self, _: &C, _: bool) -> Result<Self, DbErr>
@@ -53,8 +64,9 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 #[derive(FromQueryResult, Serialize, Deserialize, Debug)]
-pub struct UserView {
+pub struct View {
     pub id: Uuid,
+    pub member_id: u32,
     pub created_at: DateTimeUtc,
     pub username: String,
     pub email: String,

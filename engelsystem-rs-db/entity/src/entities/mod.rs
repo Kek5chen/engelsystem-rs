@@ -5,4 +5,5 @@ pub mod session;
 pub mod shift;
 pub mod angel_type;
 pub mod user_angel_type;
+pub mod user_shift;
 pub mod role_permission;

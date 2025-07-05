@@ -74,7 +74,8 @@ fn configure_routes(cfg: &mut actix_web::web::ServiceConfig) {
         .service(view_user)
         .service(view_me)
         .service(user_count)
-        .service(update_settings);
+        .service(update_settings)
+        .service(shifts_self);
 }
 
 async fn initialize_database(database_url: &str) -> crate::Result<engelsystem_rs_db::Database> {

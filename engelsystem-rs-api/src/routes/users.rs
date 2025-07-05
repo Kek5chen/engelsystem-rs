@@ -4,7 +4,7 @@ use actix_web::{
     get, web::{self, Data}, HttpResponse, Responder
 };
 use engelsystem_rs_db::{
-    role::RoleType, user::{get_all_user_views, get_user_view_by_id}, DatabaseConnection
+    role::RoleType, user::{get_all_user_views, get_user_view_by_id}, Database
 };
 use snafu::ResultExt;
 use uuid::Uuid;
@@ -43,7 +43,7 @@ impl BasicAuthTrait for UserViewAuth {
 
 #[get("/users")]
 pub async fn user_list(
-    db: Data<DatabaseConnection>,
+    db: Data<Database>,
     _user: BasicUser<BasicAdminAuth>,
 ) -> crate::Result<impl Responder> {
     let users = get_all_user_views(&db).await.context(DatabaseErr)?;
@@ -53,7 +53,7 @@ pub async fn user_list(
 
 #[get("/users/{user_id}")]
 pub async fn view_user(
-    db: Data<DatabaseConnection>,
+    db: Data<Database>,
     _user: BasicUser<UserViewAuth>,
     user_id: web::Path<String>,
 ) -> crate::Result<impl Responder> {
@@ -66,10 +66,9 @@ pub async fn view_user(
 
 #[get("/me")]
 pub async fn view_me(
-    db: Data<DatabaseConnection>,
+    db: Data<Database>,
     user: BasicUser<BasicGuestAuth>,
 ) -> crate::Result<impl Responder> {
-
     let user = get_user_view_by_id(user.uid, &db).await.context(DatabaseErr)?;
 
     Ok(

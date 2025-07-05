@@ -1,5 +1,5 @@
 use actix_web::{post, web::{Data, Json}, HttpResponse, Responder};
-use engelsystem_rs_db::{user::{update_user, ActiveUser}, DatabaseConnection};
+use engelsystem_rs_db::{user::update_user, ActiveUser, DatabaseConnection};
 use serde::{Deserialize, Serialize};
 use engelsystem_rs_db::ActiveValue::*;
 use snafu::ResultExt;
@@ -23,6 +23,7 @@ pub async fn update_settings(
     let changed = ActiveUser {
         id: NotSet,
         created_at: NotSet,
+        member_id: NotSet,
         username: Set(new.username),
         email: Set(new.email),
         password_hash: NotSet,
