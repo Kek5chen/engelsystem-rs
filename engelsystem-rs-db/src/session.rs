@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use entity::intern::*;
-use rand::distr::Alphanumeric;
 use rand::Rng;
+use rand::distr::Alphanumeric;
 use sea_orm::ActiveValue::{NotSet, Set};
-use sea_orm::{DatabaseConnection, EntityTrait, IntoActiveModel};
 use sea_orm::entity::prelude::*;
+use sea_orm::{DatabaseConnection, EntityTrait, IntoActiveModel};
 use snafu::ResultExt;
 
 use snafu::Snafu;
@@ -15,22 +15,16 @@ use tracing::debug;
 type SessionResult<T, E = SessionError> = std::result::Result<T, E>;
 
 #[derive(Debug, Snafu)]
-#[snafu(context(suffix(Err)),visibility(pub(crate)))]
+#[snafu(context(suffix(Err)), visibility(pub(crate)))]
 pub enum SessionError {
     #[snafu(transparent)]
-    Database {
-        source: sea_orm::DbErr,
-    },
+    Database { source: sea_orm::DbErr },
 
     #[snafu(display("Session Data couldn't be deserialized: {source}"))]
-    SessionDeserialize {
-        source: serde_json::Error,
-    },
+    SessionDeserialize { source: serde_json::Error },
 
     #[snafu(display("Session Data couldn't be serialized: {source}"))]
-    SessionSerialize {
-        source: serde_json::Error,
-    },
+    SessionSerialize { source: serde_json::Error },
 
     #[snafu(display("Session was not found"))]
     SessionNotFound,
@@ -38,15 +32,11 @@ pub enum SessionError {
 
 pub async fn load_session(
     db: &DatabaseConnection,
-    session_key: &str
-) -> SessionResult<Option<HashMap<String, String>>>
-{
+    session_key: &str,
+) -> SessionResult<Option<HashMap<String, String>>> {
     debug!("Loading session...");
 
-    let session = match Session::find_by_id(session_key)
-        .one(db)
-        .await? 
-    {
+    let session = match Session::find_by_id(session_key).one(db).await? {
         Some(session) => session,
         None => return Ok(None),
     };
@@ -56,15 +46,16 @@ pub async fn load_session(
         return Ok(None);
     }
 
-    Ok(Some(serde_json::from_str(&session.data).context(SessionDeserializeErr)?))
+    Ok(Some(
+        serde_json::from_str(&session.data).context(SessionDeserializeErr)?,
+    ))
 }
 
 pub async fn save_session(
     db: &DatabaseConnection,
     session_state: HashMap<String, String>,
     ttl: &Duration,
-) -> SessionResult<String>
-{
+) -> SessionResult<String> {
     debug!("Saving session...");
 
     let data = serde_json::to_string(&session_state).context(SessionSerializeErr)?;
@@ -80,7 +71,8 @@ pub async fn save_session(
         created_at: NotSet,
         data: Set(data),
         expires_at: Set(expires_at),
-    }.insert(db)
+    }
+    .insert(db)
     .await?;
 
     Ok(session_key)
@@ -91,8 +83,7 @@ pub async fn update_session(
     session_key: &str,
     session_state: HashMap<String, String>,
     ttl: &Duration,
-) -> SessionResult<()>
-{
+) -> SessionResult<()> {
     debug!("Updating session...");
 
     let data = serde_json::to_string(&session_state).context(SessionSerializeErr)?;
@@ -116,8 +107,7 @@ pub async fn update_session_ttl(
     db: &DatabaseConnection,
     session_key: &str,
     ttl: &Duration,
-) -> SessionResult<()>
-{
+) -> SessionResult<()> {
     debug!("Updating session TTL...");
 
     let mut session = Session::find_by_id(session_key)
@@ -132,16 +122,15 @@ pub async fn update_session_ttl(
     Ok(())
 }
 
-pub async fn delete_session(
-    db: &DatabaseConnection,
-    session_key: &str,
-) -> SessionResult<()> {
+pub async fn delete_session(db: &DatabaseConnection, session_key: &str) -> SessionResult<()> {
     debug!("Deleting session...");
 
     if Session::delete_by_id(session_key)
         .exec(db)
         .await?
-        .rows_affected == 0 {
+        .rows_affected
+        == 0
+    {
         return Err(SessionError::SessionNotFound);
     }
 

@@ -1,7 +1,7 @@
-use sea_orm::{prelude::async_trait::async_trait, DeriveEntityModel};
+use sea_orm::prelude::*;
+use sea_orm::{DeriveEntityModel, prelude::async_trait::async_trait};
 use serde::Serialize;
 use uuid::Uuid;
-use sea_orm::prelude::*;
 
 #[derive(Clone, Debug, DeriveEntityModel, Serialize)]
 #[sea_orm(table_name = "shift")]
@@ -24,25 +24,24 @@ pub enum Relation {
     #[sea_orm(
         belongs_to = "super::angel_type::Entity",
         from = "Column::AngelTypeId",
-        to = "super::angel_type::Column::Id",
+        to = "super::angel_type::Column::Id"
     )]
     AngelTypeId,
 
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::ManagedBy",
-        to = "super::user::Column::Id",
+        to = "super::user::Column::Id"
     )]
     ManagedBy,
 
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::CreatedBy",
-        to = "super::user::Column::Id",
+        to = "super::user::Column::Id"
     )]
     CreatedBy,
 }
 
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {}
-

@@ -3,19 +3,18 @@ use std::env;
 use clap::Parser;
 use cli::EngelCli;
 use engelsystem_rs_db::{
-    connect,
+    DatabaseConnection, UserView, connect,
     role::RoleType,
     user::{add_guest, get_all_user_views, get_role_by_username, set_role_by_username},
-    DatabaseConnection, UserView,
 };
 use log::{info, warn};
-use rand::{distr::Alphanumeric, Rng as _};
+use rand::{Rng as _, distr::Alphanumeric};
 use ratatui::{
+    Frame,
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
     layout::Constraint,
     style::{Style, Stylize},
     widgets::{Block, Row, Table, TableState},
-    Frame,
 };
 
 mod cli;
@@ -110,30 +109,28 @@ struct UserList {
 impl UserList {
     pub fn new(users: &[UserView]) -> Self {
         let user_data = users
-        .iter()
-        .map(|u| {
-            [
-                u.id.to_string(),
-                u.created_at.to_string(),
-                u.username.to_string(),
-                u.email.to_string(),
-                u.role.to_string(),
-            ]
-        })
-        .collect();
+            .iter()
+            .map(|u| {
+                [
+                    u.id.to_string(),
+                    u.created_at.to_string(),
+                    u.username.to_string(),
+                    u.email.to_string(),
+                    u.role.to_string(),
+                ]
+            })
+            .collect();
 
         UserList {
             state: TableState::default(),
-            items: user_data
+            items: user_data,
         }
     }
 
     pub fn run(mut self) {
         let mut terminal = ratatui::init();
         loop {
-            terminal
-                .draw(|frame| self.draw(frame))
-                .unwrap();
+            terminal.draw(|frame| self.draw(frame)).unwrap();
 
             if let Event::Key(key) = event::read().unwrap() {
                 if key.kind != KeyEventKind::Press {
@@ -180,11 +177,9 @@ impl UserList {
         self.state.select(Some(i));
     }
 
-    pub fn draw(
-        &mut self,
-        frame: &mut Frame,
-    ) {
-        let users: Vec<Row> = self.items
+    pub fn draw(&mut self, frame: &mut Frame) {
+        let users: Vec<Row> = self
+            .items
             .iter()
             .map(|r| r.iter().map(|s| s.as_str()).collect())
             .collect();

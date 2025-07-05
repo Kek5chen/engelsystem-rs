@@ -1,9 +1,8 @@
 use actix_web::{
-    get,
+    HttpResponse, Responder, get,
     http::header,
     post,
     web::{Data, Form, Html, Query},
-    HttpResponse, Responder,
 };
 use engelsystem_rs_db::UserView;
 use serde::{Deserialize, Serialize};
@@ -46,17 +45,17 @@ pub async fn settings_page(
 
     if update_status.success.is_some() {
         Ok(Html::new(
-            render_template!(&templates, "settings_updated.html", session, [ 
+            render_template!(&templates, "settings_updated.html", session, [
                 "user" => &user,
                 "success" => &update_status.success,
                 "error" => &update_status.error
-            ])?
+            ])?,
         ))
     } else {
         Ok(Html::new(
-            render_template!(&templates, "settings.html", session, [ 
+            render_template!(&templates, "settings.html", session, [
                 "user" => &user
-            ])?
+            ])?,
         ))
     }
 }

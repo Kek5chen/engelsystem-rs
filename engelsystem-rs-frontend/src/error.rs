@@ -1,8 +1,8 @@
-use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
+use crate::utils::response_ext::ActixResponseExt;
+use actix_web::{HttpResponse, ResponseError, body::BoxBody, http::StatusCode};
 use reqwest::StatusCode as ReqwestStatusCode;
 use snafu::Snafu;
 use tracing::error;
-use crate::utils::response_ext::ActixResponseExt;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -64,8 +64,7 @@ impl ResponseError for Error {
 
         if status == StatusCode::UNAUTHORIZED {
             res.status(StatusCode::SEE_OTHER);
-            res.redirect_to("/")
-                .expire_session();
+            res.redirect_to("/").expire_session();
         }
 
         res.body(BoxBody::new(self.to_string()))

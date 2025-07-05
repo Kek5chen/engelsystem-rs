@@ -1,4 +1,4 @@
-use actix_web::{http::header::ContentType, HttpResponse, HttpResponseBuilder};
+use actix_web::{HttpResponse, HttpResponseBuilder, http::header::ContentType};
 
 pub trait ActixResponseExt {
     fn html(self, html: impl Into<String>) -> HttpResponse;
@@ -11,7 +11,7 @@ impl ActixResponseExt for HttpResponseBuilder {
     fn html(mut self, html: impl Into<String>) -> HttpResponse {
         self.content_type(ContentType::html()).body(html.into())
     }
-    
+
     fn redirect_to(&mut self, url: &str) -> &mut Self {
         self.insert_header((actix_web::http::header::LOCATION, url))
     }
@@ -34,4 +34,3 @@ impl ActixResponseExt for HttpResponseBuilder {
         self.cookie(cookie)
     }
 }
-

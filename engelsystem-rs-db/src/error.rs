@@ -3,12 +3,10 @@ use snafu::Snafu;
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug, Snafu)]
-#[snafu(context(suffix(Err)),module(generated),visibility(pub(crate)))]
+#[snafu(context(suffix(Err)), module(generated), visibility(pub(crate)))]
 pub enum Error {
     #[snafu(transparent)]
-    Database {
-        source: sea_orm::DbErr,
-    },
+    Database { source: sea_orm::DbErr },
 
     #[snafu(display("The requested user was not found"))]
     UserNotFound,
@@ -17,9 +15,7 @@ pub enum Error {
     UserExists,
 
     #[snafu(display("There's no user with the username {username:?}"))]
-    UsernameNotFound {
-        username: String,
-    },
+    UsernameNotFound { username: String },
 
     #[snafu(display("Hashing Error"))]
     Hashing,

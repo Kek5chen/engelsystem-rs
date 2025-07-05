@@ -4,7 +4,7 @@ use crate::error::generated::*;
 use crate::routes::*;
 use crate::session_db::DbSessionStore;
 use actix_session::SessionMiddleware;
-use actix_web::{cookie::Key, web::Data, App, HttpServer};
+use actix_web::{App, HttpServer, cookie::Key, web::Data};
 use engelsystem_rs_db::connect_and_migrate;
 use snafu::ResultExt;
 use tracing::warn;
@@ -50,7 +50,9 @@ impl ServerConfig {
 
     fn handle_missing_secret() -> Vec<u8> {
         if cfg!(debug_assertions) {
-            warn!("No SECRET set. Using default secret. This is unsafe in production and only for debug mode.");
+            warn!(
+                "No SECRET set. Using default secret. This is unsafe in production and only for debug mode."
+            );
             DUMMY_SECRET_KEY.to_vec()
         } else {
             warn!("No SECRET set. This is a release build so we will not generate one.");
@@ -79,37 +81,38 @@ fn configure_routes(cfg: &mut actix_web::web::ServiceConfig) {
 }
 
 async fn initialize_database(database_url: &str) -> crate::Result<engelsystem_rs_db::Database> {
-    connect_and_migrate(database_url)
-        .await
-        .context(DatabaseErr)
+    connect_and_migrate(database_url).await.context(DatabaseErr)
 }
 
-async fn start_server(config: ServerConfig, shared_db: Data<engelsystem_rs_db::Database>) -> crate::Result<()> {
-    HttpServer::new(move || 
-            App::new()
-                .wrap(
-                    SessionMiddleware::builder(
-                        DbSessionStore::new(shared_db.clone()),
-                        Key::from(&config.secret_key),
-                    )
-                    .cookie_name(SESSION_COOKIE_NAME.to_string())
-                    .build(),
+async fn start_server(
+    config: ServerConfig,
+    shared_db: Data<engelsystem_rs_db::Database>,
+) -> crate::Result<()> {
+    HttpServer::new(move || {
+        App::new()
+            .wrap(
+                SessionMiddleware::builder(
+                    DbSessionStore::new(shared_db.clone()),
+                    Key::from(&config.secret_key),
                 )
-                .app_data(shared_db.clone())
-                .configure(configure_routes)
-        )
-        .bind((Ipv4Addr::UNSPECIFIED, config.port))
-        .context(WebserverErr)?
-        .run()
-        .await
-        .context(WebserverErr)
+                .cookie_name(SESSION_COOKIE_NAME.to_string())
+                .build(),
+            )
+            .app_data(shared_db.clone())
+            .configure(configure_routes)
+    })
+    .bind((Ipv4Addr::UNSPECIFIED, config.port))
+    .context(WebserverErr)?
+    .run()
+    .await
+    .context(WebserverErr)
 }
 
 pub async fn run_server() -> crate::Result<()> {
     let config = ServerConfig::from_env();
-    
+
     let db = initialize_database(&config.database_url).await?;
     let shared_db = Data::new(db);
-    
+
     start_server(config, shared_db).await
 }

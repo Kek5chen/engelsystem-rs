@@ -1,13 +1,19 @@
-use actix_web::{post, web::{Data, Json}, HttpResponse, Responder};
-use engelsystem_rs_db::{user::{self}, DatabaseConnection};
+use actix_web::{
+    HttpResponse, Responder, post,
+    web::{Data, Json},
+};
+use engelsystem_rs_db::{
+    DatabaseConnection,
+    user::{self},
+};
 use serde::Deserialize;
 use snafu::ResultExt;
 use tracing::info;
 use validator::Validate;
 use zeroize::Zeroizing;
 
-use crate::{generated::DatabaseErr, Error};
 use crate::utils::validation::*;
+use crate::{Error, generated::DatabaseErr};
 
 // TODO: Validate better
 #[derive(Debug, Deserialize, Validate)]
@@ -45,8 +51,7 @@ async fn request_register(
 
     info!("User {:?} registered", data.username);
 
-    match user::add_guest(data.username, data.email, &data.password, &db)
-        .await {
+    match user::add_guest(data.username, data.email, &data.password, &db).await {
         Ok(_) => Ok(HttpResponse::Ok()),
         Err(engelsystem_rs_db::Error::UserExists) => Err(Error::UserExists),
         Err(e) => Err(e).context(DatabaseErr),

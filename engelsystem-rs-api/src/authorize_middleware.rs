@@ -1,16 +1,18 @@
 use std::{marker::PhantomData, pin::Pin};
 
 use actix_session::SessionExt;
-use actix_web::{dev::Payload, FromRequest, HttpRequest};
+use actix_web::{FromRequest, HttpRequest, dev::Payload};
 use engelsystem_rs_db::role::RoleType;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 use uuid::Uuid;
 
-use crate::{generated::SessionDeserializeErr, Error};
+use crate::{Error, generated::SessionDeserializeErr};
 
 trait BasicResolveSessionImpl {
-    fn basic_resolve_session<A: BasicAuthTrait>(req: &actix_web::HttpRequest) -> crate::Result<BasicUser<A>> {
+    fn basic_resolve_session<A: BasicAuthTrait>(
+        req: &actix_web::HttpRequest,
+    ) -> crate::Result<BasicUser<A>> {
         let session = req.get_session();
         let user_id: Uuid = session
             .get("user_id")
@@ -31,8 +33,11 @@ trait BasicResolveSessionImpl {
 impl<T: BasicAuthTrait> BasicResolveSessionImpl for T {}
 
 pub trait BasicAuthTrait: Sized + 'static {
-    fn authenticate(user: BasicUser<Self>, req: actix_web::HttpRequest) -> impl Future<Output = crate::Result<BasicUser<Self>>>;
-} 
+    fn authenticate(
+        user: BasicUser<Self>,
+        req: actix_web::HttpRequest,
+    ) -> impl Future<Output = crate::Result<BasicUser<Self>>>;
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct BasicUser<AuthType: BasicAuthTrait> {
@@ -66,10 +71,12 @@ impl<A: BasicAuthTrait> FromRequest for BasicUser<A> {
     }
 }
 
-
 pub struct BasicAdminAuth(());
 impl BasicAuthTrait for BasicAdminAuth {
-    async fn authenticate(user: BasicUser<Self>, _req: HttpRequest) -> crate::Result<BasicUser<Self>> {
+    async fn authenticate(
+        user: BasicUser<Self>,
+        _req: HttpRequest,
+    ) -> crate::Result<BasicUser<Self>> {
         if user.role.is_bypass() {
             Ok(user)
         } else {
@@ -78,10 +85,12 @@ impl BasicAuthTrait for BasicAdminAuth {
     }
 }
 
-
 pub struct BasicUserAuth(());
 impl BasicAuthTrait for BasicUserAuth {
-    async fn authenticate(user: BasicUser<Self>, _req: HttpRequest) -> crate::Result<BasicUser<Self>> {
+    async fn authenticate(
+        user: BasicUser<Self>,
+        _req: HttpRequest,
+    ) -> crate::Result<BasicUser<Self>> {
         if user.role.is_bypass() || user.role == RoleType::User {
             Ok(user)
         } else {
@@ -90,11 +99,12 @@ impl BasicAuthTrait for BasicUserAuth {
     }
 }
 
-
 pub struct BasicGuestAuth(());
 impl BasicAuthTrait for BasicGuestAuth {
-    async fn authenticate(user: BasicUser<Self>, _req: HttpRequest) -> crate::Result<BasicUser<Self>> {
+    async fn authenticate(
+        user: BasicUser<Self>,
+        _req: HttpRequest,
+    ) -> crate::Result<BasicUser<Self>> {
         Ok(user)
     }
 }
-

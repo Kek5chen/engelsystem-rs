@@ -1,11 +1,14 @@
+use crate::utils::validation::*;
 use actix_session::Session;
-use actix_web::{post, web::{Data, Json}, HttpResponse, Responder};
-use engelsystem_rs_db::{user::verify_user, DatabaseConnection};
+use actix_web::{
+    HttpResponse, Responder, post,
+    web::{Data, Json},
+};
+use engelsystem_rs_db::{DatabaseConnection, user::verify_user};
 use serde::Deserialize;
 use tracing::info;
 use validator::Validate;
 use zeroize::Zeroizing;
-use crate::utils::validation::*;
 
 #[derive(Debug, Deserialize, Validate)]
 struct LoginData {

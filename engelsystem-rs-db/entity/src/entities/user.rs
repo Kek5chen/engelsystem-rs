@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue::Set;
 use sea_orm::FromQueryResult;
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
@@ -28,7 +28,7 @@ pub enum Relation {
     #[sea_orm(
         belongs_to = "super::role::Entity",
         from = "Column::RoleId",
-        to = "super::role::Column::Id",
+        to = "super::role::Column::Id"
     )]
     Role,
 }
@@ -53,13 +53,13 @@ impl Related<super::shift::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {
     async fn before_save<C>(mut self, _: &C, _: bool) -> Result<Self, DbErr>
     where
-        C: ConnectionTrait
+        C: ConnectionTrait,
     {
         if self.id.is_not_set() {
             self.id = Set(Uuid::new_v4());
         }
 
-        Ok(self) 
+        Ok(self)
     }
 }
 
@@ -74,4 +74,3 @@ pub struct View {
 
     pub points: u32,
 }
-

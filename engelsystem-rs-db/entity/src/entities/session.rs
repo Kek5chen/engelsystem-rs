@@ -1,8 +1,6 @@
 use sea_orm::entity::prelude::*;
 use time::OffsetDateTime;
 
-
-
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "session")]
 pub struct Model {

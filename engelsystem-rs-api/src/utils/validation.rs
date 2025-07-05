@@ -44,4 +44,3 @@ pub fn validate_username(username: &str) -> Result<(), ValidationError> {
         Ok(())
     }
 }
-

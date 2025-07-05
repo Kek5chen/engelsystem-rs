@@ -9,7 +9,11 @@ use snafu::ResultExt;
 use tera::Tera;
 
 use crate::{
-    generated::BackendErr, render_template, session::{PublicSession, ResponseCookieExt}, utils::response_ext::ActixResponseExt, Error
+    Error,
+    generated::BackendErr,
+    render_template,
+    session::{PublicSession, ResponseCookieExt},
+    utils::response_ext::ActixResponseExt,
 };
 
 #[derive(Deserialize)]
@@ -50,11 +54,12 @@ pub async fn request_login(
         .context(BackendErr)?;
 
     if response.status().is_success() {
-        let session_id = response
-            .cookie("session-id")
-            .ok_or_else(|| Error::BackendCookieInvalid {
-                name: "session-id".to_string(),
-            })?;
+        let session_id =
+            response
+                .cookie("session-id")
+                .ok_or_else(|| Error::BackendCookieInvalid {
+                    name: "session-id".to_string(),
+                })?;
 
         return Ok(HttpResponse::SeeOther()
             .session_cookie(session_id.value())

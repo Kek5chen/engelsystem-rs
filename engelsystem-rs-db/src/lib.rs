@@ -1,14 +1,14 @@
 pub mod error;
 pub mod permission;
 pub mod role;
-pub mod user;
 pub mod session;
 pub mod shift;
+pub mod user;
 
 pub use error::*;
+pub use sea_orm::ActiveValue;
 pub use sea_orm::DatabaseConnection;
 pub use sea_orm::DatabaseConnection as Database;
-pub use sea_orm::ActiveValue;
 
 pub use entity::public::*;
 

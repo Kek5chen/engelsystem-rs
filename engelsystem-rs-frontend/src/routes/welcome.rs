@@ -1,15 +1,9 @@
-use actix_web::{
-    get,
-    web::Data,
-    HttpResponse, Responder,
-};
+use actix_web::{HttpResponse, Responder, get, web::Data};
 use engelsystem_rs_db::UserView;
 use reqwest::header;
 use tera::Tera;
 
-use crate::{
-    render_template, session::Session, utils::response_ext::ActixResponseExt,
-};
+use crate::{render_template, session::Session, utils::response_ext::ActixResponseExt};
 
 #[get("/welcome")]
 async fn welcome_page(
@@ -26,7 +20,6 @@ async fn welcome_page(
         .error_for_status()?
         .json()
         .await?;
-
 
     Ok(HttpResponse::Ok()
         .html(render_template!(&templates, "welcome.html", session, [ "user" => &user ])?))

@@ -1,18 +1,21 @@
 use std::str::FromStr;
 
 use actix_web::{
-    get, web::{self, Data}, HttpResponse, Responder
+    HttpResponse, Responder, get,
+    web::{self, Data},
 };
 use engelsystem_rs_db::{
-    role::RoleType, user::{get_all_user_views, get_user_view_by_id}, Database
+    Database,
+    role::RoleType,
+    user::{get_all_user_views, get_user_view_by_id},
 };
 use snafu::ResultExt;
 use uuid::Uuid;
 
 use crate::{
+    Error,
     authorize_middleware::{BasicAdminAuth, BasicAuthTrait, BasicGuestAuth, BasicUser},
     generated::DatabaseErr,
-    Error,
 };
 
 // To use this type of authentication, please specify a user_id resource on the request which
@@ -69,15 +72,15 @@ pub async fn view_me(
     db: Data<Database>,
     user: BasicUser<BasicGuestAuth>,
 ) -> crate::Result<impl Responder> {
-    let user = get_user_view_by_id(user.uid, &db).await.context(DatabaseErr)?;
+    let user = get_user_view_by_id(user.uid, &db)
+        .await
+        .context(DatabaseErr)?;
 
-    Ok(
-        match user {
-            Some(user) => HttpResponse::Ok().json(&user),
-            None => {
-                tracing::error!("User session passed but user object not found");
-                HttpResponse::InternalServerError().finish()
-            }
+    Ok(match user {
+        Some(user) => HttpResponse::Ok().json(&user),
+        None => {
+            tracing::error!("User session passed but user object not found");
+            HttpResponse::InternalServerError().finish()
         }
-    )
+    })
 }

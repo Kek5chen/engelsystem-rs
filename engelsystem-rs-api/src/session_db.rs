@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use actix_session::storage::{LoadError, SaveError, SessionKey, SessionStore, UpdateError};
 use actix_web::{cookie::time::Duration, web::Data};
 use engelsystem_rs_db::{
-    session::{delete_session, load_session, save_session, update_session, update_session_ttl},
     DatabaseConnection,
+    session::{delete_session, load_session, save_session, update_session, update_session_ttl},
 };
 use tracing::error;
 
@@ -31,7 +31,7 @@ impl SessionStore for DbSessionStore {
                 _ => {
                     error!("Error when loading session: {err}");
                     Err(LoadError::Other(err.into()))?
-                },
+                }
             },
         };
 

@@ -1,10 +1,16 @@
-use actix_web::{post, web::{Data, Json}, HttpResponse, Responder};
-use engelsystem_rs_db::{user::update_user, ActiveUser, DatabaseConnection};
-use serde::{Deserialize, Serialize};
+use actix_web::{
+    HttpResponse, Responder, post,
+    web::{Data, Json},
+};
 use engelsystem_rs_db::ActiveValue::*;
+use engelsystem_rs_db::{ActiveUser, DatabaseConnection, user::update_user};
+use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
-use crate::{authorize_middleware::{BasicGuestAuth, BasicUser}, generated::DatabaseErr};
+use crate::{
+    authorize_middleware::{BasicGuestAuth, BasicUser},
+    generated::DatabaseErr,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SettingsUpdateRequest {
@@ -28,12 +34,16 @@ pub async fn update_settings(
         email: Set(new.email),
         password_hash: NotSet,
         role_id: NotSet,
-        points: NotSet 
+        points: NotSet,
     };
 
     dbg!(&changed);
 
-    if update_user(session.uid, changed, &db).await.context(DatabaseErr)?.is_some() {
+    if update_user(session.uid, changed, &db)
+        .await
+        .context(DatabaseErr)?
+        .is_some()
+    {
         Ok(HttpResponse::Ok())
     } else {
         dbg!("No change");

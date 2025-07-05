@@ -1,16 +1,16 @@
 use std::time::Duration;
 
-use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::PasswordHasher;
-use argon2::{password_hash::SaltString, Argon2};
+use argon2::password_hash::rand_core::OsRng;
+use argon2::{Argon2, password_hash::SaltString};
 use argon2::{PasswordHash, PasswordVerifier};
 use entity::public::{self};
-use sea_orm::{prelude::*, ActiveValue::*, IntoActiveModel, Iterable, QuerySelect, SelectColumns};
+use sea_orm::{ActiveValue::*, IntoActiveModel, Iterable, QuerySelect, SelectColumns, prelude::*};
 use snafu::ResultExt;
 use tracing::error;
 
-use crate::role::RoleType;
 use crate::Error;
+use crate::role::RoleType;
 use entity::intern::*;
 
 pub async fn get_all_guests(db: &DatabaseConnection) -> crate::Result<Vec<user::Model>> {
