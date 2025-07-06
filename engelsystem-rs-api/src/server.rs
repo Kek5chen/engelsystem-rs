@@ -119,6 +119,7 @@ async fn start_server(
                     Key::from(&config.secret_key),
                 )
                 .cookie_name(SESSION_COOKIE_NAME.to_string())
+                .cookie_content_security(actix_session::config::CookieContentSecurity::Signed)
                 .build(),
             )
             .app_data(shared_db.clone())
