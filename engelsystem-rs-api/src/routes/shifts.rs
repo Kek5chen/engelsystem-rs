@@ -12,7 +12,7 @@ use snafu::{OptionExt, ResultExt};
 use uuid::Uuid;
 
 use crate::{
-    authorize_middleware::{BasicAdminAuth, BasicGuestAuth, BasicUser, BasicUserAuth},
+    authorize_middleware::{BasicAdminAuth, BasicGuestAuth, BasicUser},
     generated::{AngelTypeNotFoundErr, DatabaseErr, UserNotFoundErr},
 };
 
