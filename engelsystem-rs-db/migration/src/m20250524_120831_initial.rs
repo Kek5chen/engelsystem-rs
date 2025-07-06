@@ -145,7 +145,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Shift::Table)
                     .if_not_exists()
-                    .col(uuid(Shift::Id).primary_key())
+                    .col(pk_uuid(Shift::Id))
                     .col(timestamp(Shift::CreatedAt).default(Expr::current_timestamp()))
                     .col(uuid(Shift::CreatedBy))
                     .col(uuid_null(Shift::ManagedBy))
