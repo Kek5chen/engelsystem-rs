@@ -1,5 +1,3 @@
-use std::future;
-
 use actix_web::{HttpResponse, Responder, get, web::Data};
 use engelsystem_rs_db::{Shift, UserView};
 use tera::Tera;
