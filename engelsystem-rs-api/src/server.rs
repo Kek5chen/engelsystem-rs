@@ -5,6 +5,13 @@ use crate::routes::*;
 use crate::session_db::DbSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::{App, HttpServer, cookie::Key, web::Data};
+use apistos::{
+    SwaggerUIConfig,
+    app::{BuildConfig, OpenApiWrapper},
+    info::Info,
+    spec::Spec,
+    web::{ServiceConfig, get, post, put, resource, scope},
+};
 use engelsystem_rs_db::connect_and_migrate;
 use snafu::ResultExt;
 use tracing::warn;
@@ -68,20 +75,35 @@ impl ServerConfig {
     }
 }
 
-fn configure_routes(cfg: &mut actix_web::web::ServiceConfig) {
-    cfg.service(request_register)
-        .service(request_login)
-        .service(request_logout)
-        .service(user_list)
-        .service(view_user)
-        .service(view_me)
-        .service(user_count)
-        .service(update_settings)
-        .service(shifts_self);
+fn configure_routes(cfg: &mut ServiceConfig) {
+    cfg.service(resource("/register").route(post().to(request_register)))
+        .service(resource("/login").route(post().to(request_login)))
+        .service(resource("/logout").route(get().to(request_logout)))
+        .service(resource("/users").route(get().to(user_list)))
+        .service(resource("/users/{user_id}").route(get().to(view_user)))
+        .service(resource("/me").route(get().to(view_me)))
+        .service(resource("/stats/user_count").route(get().to(user_count)))
+        .service(resource("/settings").route(post().to(update_settings)))
+        .service(
+            scope("/shifts")
+                .service(resource("/").route(put().to(shift_add)))
+                .service(resource("/me").route(get().to(shifts_self))),
+        );
 }
 
 async fn initialize_database(database_url: &str) -> crate::Result<engelsystem_rs_db::Database> {
     connect_and_migrate(database_url).await.context(DatabaseErr)
+}
+
+fn api_spec() -> Spec {
+    Spec {
+        info: Info {
+            title: "Engelsystem RS API".to_string(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            ..Default::default()
+        },
+        ..Default::default()
+    }
 }
 
 async fn start_server(
@@ -90,6 +112,7 @@ async fn start_server(
 ) -> crate::Result<()> {
     HttpServer::new(move || {
         App::new()
+            .document(api_spec())
             .wrap(
                 SessionMiddleware::builder(
                     DbSessionStore::new(shared_db.clone()),
@@ -100,6 +123,10 @@ async fn start_server(
             )
             .app_data(shared_db.clone())
             .configure(configure_routes)
+            .build_with(
+                "/openapi.json",
+                BuildConfig::default().with(SwaggerUIConfig::new(&"swagger")),
+            )
     })
     .bind((Ipv4Addr::UNSPECIFIED, config.port))
     .context(WebserverErr)?

@@ -1,9 +1,11 @@
+use apistos::ApiComponent;
+use schemars::JsonSchema;
 use sea_orm::prelude::*;
 use sea_orm::{DeriveEntityModel, prelude::async_trait::async_trait};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, DeriveEntityModel, Serialize)]
+#[derive(Clone, Debug, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[sea_orm(table_name = "shift")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

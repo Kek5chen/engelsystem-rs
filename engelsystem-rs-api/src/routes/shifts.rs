@@ -1,23 +1,25 @@
-use actix_web::{
-    get, put,
-    web::{Data, Json},
-};
+use actix_web::web::{Data, Json};
+use apistos::{ApiComponent, api_operation};
 use chrono::{DateTime, Utc};
 use engelsystem_rs_db::{
     ActiveShift, Database, Shift,
     shift::{add_shift, get_shifts_by_user},
     user::{get_angel_type_id_by_name, get_user_id_by_name},
 };
+use schemars::JsonSchema;
 use serde::Deserialize;
 use snafu::{OptionExt, ResultExt};
 use uuid::Uuid;
 
 use crate::{
-    authorize_middleware::{BasicUser, BasicUserAuth},
+    authorize_middleware::{BasicAdminAuth, BasicUser, BasicUserAuth},
     generated::{AngelTypeNotFoundErr, DatabaseErr, UserNotFoundErr},
 };
 
-#[get("/shifts/me")]
+#[api_operation(
+    summary = "Get all shifts you are helping out in",
+    security_scope(name = "session_id", scope = "user",)
+)]
 pub async fn shifts_self(
     db: Data<Database>,
     user: BasicUser<BasicUserAuth>,
@@ -29,7 +31,7 @@ pub async fn shifts_self(
     Ok(Json(shifts))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct NewShift {
     pub managed_by: Option<String>,
     pub starts_at: DateTime<Utc>,
@@ -76,11 +78,14 @@ impl NewShift {
     }
 }
 
-#[put("/shifts")]
+#[api_operation(
+    summary = "Add a shift",
+    security_scope(name = "session-id", scope = "admin",)
+)]
 pub async fn shift_add(
     Json(shift): Json<NewShift>,
     db: Data<Database>,
-    user: BasicUser<BasicUserAuth>,
+    user: BasicUser<BasicAdminAuth>,
 ) -> crate::Result<Json<Shift>> {
     let shifts = add_shift(shift.prepare(user.uid, &db).await?, &db)
         .await

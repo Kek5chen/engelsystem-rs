@@ -17,10 +17,12 @@ regex = "1.11.1"
 zeroize = { version = "1.8.1", features = ["serde"] }
 snafu = "0.8.5"
 anyhow = "1.0.98"
-uuid = "1.17.0"
+uuid = { version = "1.17.0", features = ["serde"] }
 dotenvy = "0.15.7"
 rand = "0.9.1"
-chrono = "0.4.41"
+chrono = { version = "0.4.41", features = ["serde"] }
+schemars = { package = "apistos-schemars", features = ["derive_json_schema"], version = "0.8" }
+apistos = { version = "0.6", features = ["swagger-ui"] }
 
 [dev-dependencies]
 engelsystem-rs-db = { path = "../engelsystem-rs-db", features = [ "debug-print" ] }

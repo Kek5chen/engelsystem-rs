@@ -1,9 +1,15 @@
 use actix_web::{
-    HttpResponse, Responder, post,
+    Either,
     web::{Data, Json},
+};
+use apistos::{
+    ApiComponent,
+    actix::{AcceptedJson, NoContent},
+    api_operation,
 };
 use engelsystem_rs_db::ActiveValue::*;
 use engelsystem_rs_db::{ActiveUser, DatabaseConnection, user::update_user};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
@@ -12,7 +18,7 @@ use crate::{
     generated::DatabaseErr,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JsonSchema, ApiComponent)]
 pub struct SettingsUpdateRequest {
     username: String,
     email: String,
@@ -20,12 +26,12 @@ pub struct SettingsUpdateRequest {
     confirm_password: Option<String>,
 }
 
-#[post("/settings")]
+#[api_operation(summary = "Update user settings", security_scope(name = "session-id",))]
 pub async fn update_settings(
     db: Data<DatabaseConnection>,
     session: BasicUser<BasicGuestAuth>,
     Json(new): Json<SettingsUpdateRequest>,
-) -> crate::Result<impl Responder> {
+) -> crate::Result<Either<AcceptedJson<()>, NoContent>> {
     let changed = ActiveUser {
         id: NotSet,
         created_at: NotSet,
@@ -37,16 +43,13 @@ pub async fn update_settings(
         points: NotSet,
     };
 
-    dbg!(&changed);
-
     if update_user(session.uid, changed, &db)
         .await
         .context(DatabaseErr)?
         .is_some()
     {
-        Ok(HttpResponse::Ok())
+        Ok(Either::Left(AcceptedJson(())))
     } else {
-        dbg!("No change");
-        Ok(HttpResponse::NoContent())
+        Ok(Either::Right(NoContent))
     }
 }

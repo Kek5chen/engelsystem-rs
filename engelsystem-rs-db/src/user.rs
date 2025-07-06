@@ -5,8 +5,7 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, password_hash::SaltString};
 use argon2::{PasswordHash, PasswordVerifier};
 use entity::public::{self};
-use sea_orm::{ActiveValue::*, IntoActiveModel, Iterable, QuerySelect, SelectColumns, prelude::*};
-use snafu::ResultExt;
+use sea_orm::{ActiveValue::*, IntoActiveModel, Iterable, QuerySelect, prelude::*};
 use tracing::error;
 
 use crate::Error;

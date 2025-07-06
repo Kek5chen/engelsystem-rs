@@ -2,6 +2,7 @@ use std::{marker::PhantomData, pin::Pin};
 
 use actix_session::SessionExt;
 use actix_web::{FromRequest, HttpRequest, dev::Payload};
+use apistos::ApiSecurity;
 use engelsystem_rs_db::role::RoleType;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
@@ -39,7 +40,8 @@ pub trait BasicAuthTrait: Sized + 'static {
     ) -> impl Future<Output = crate::Result<BasicUser<Self>>>;
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ApiSecurity)]
+#[openapi_security(scheme(security_type(api_key(name = "session-id", api_key_in = "cookie"))))]
 pub struct BasicUser<AuthType: BasicAuthTrait> {
     pub uid: Uuid,
     pub role: RoleType,

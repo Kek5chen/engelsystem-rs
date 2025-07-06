@@ -1,4 +1,6 @@
+use apistos::ApiComponent;
 use async_trait::async_trait;
+use schemars::JsonSchema;
 use sea_orm::ActiveValue::Set;
 use sea_orm::FromQueryResult;
 use sea_orm::entity::prelude::*;
@@ -63,7 +65,7 @@ impl ActiveModelBehavior for ActiveModel {
     }
 }
 
-#[derive(FromQueryResult, Serialize, Deserialize, Debug)]
+#[derive(FromQueryResult, Serialize, Deserialize, Debug, JsonSchema, ApiComponent)]
 pub struct View {
     pub id: Uuid,
     pub member_id: u32,

@@ -1,21 +1,19 @@
 use std::str::FromStr;
 
-use actix_web::{
-    HttpResponse, Responder, get,
-    web::{self, Data},
-};
+use actix_web::web::{self, Data, Json};
+use apistos::api_operation;
 use engelsystem_rs_db::{
-    Database,
+    Database, UserView,
     role::RoleType,
     user::{get_all_user_views, get_user_view_by_id},
 };
-use snafu::ResultExt;
+use snafu::{OptionExt, ResultExt};
 use uuid::Uuid;
 
 use crate::{
     Error,
     authorize_middleware::{BasicAdminAuth, BasicAuthTrait, BasicGuestAuth, BasicUser},
-    generated::DatabaseErr,
+    generated::{DatabaseErr, UIDNotFoundErr},
 };
 
 // To use this type of authentication, please specify a user_id resource on the request which
@@ -44,43 +42,55 @@ impl BasicAuthTrait for UserViewAuth {
 
 // assuming we don't want to filter out specific users depending on the callers permissions
 
-#[get("/users")]
+#[api_operation(
+    summary = "Get a view of all users",
+    security_scope(name = "session-id", scope = "admin",)
+)]
 pub async fn user_list(
     db: Data<Database>,
     _user: BasicUser<BasicAdminAuth>,
-) -> crate::Result<impl Responder> {
+) -> crate::Result<Json<Vec<UserView>>> {
     let users = get_all_user_views(&db).await.context(DatabaseErr)?;
 
-    Ok(HttpResponse::Ok().json(users))
+    Ok(Json(users))
 }
 
-#[get("/users/{user_id}")]
+#[api_operation(
+    summary = "View a user by their user id",
+    security_scope(name = "session-id", scope = "user")
+)]
 pub async fn view_user(
     db: Data<Database>,
     _user: BasicUser<UserViewAuth>,
     user_id: web::Path<String>,
-) -> crate::Result<impl Responder> {
+) -> crate::Result<Json<UserView>> {
     let uid = user_id.into_inner();
-    let uid = Uuid::from_str(&uid).map_err(|_| Error::InvalidUid { uid })?;
-    let user = get_user_view_by_id(uid, &db).await.context(DatabaseErr)?;
+    let uuid = Uuid::from_str(&uid).map_err(|_| Error::InvalidUid { uid: uid.clone() })?;
+    let user = get_user_view_by_id(uuid, &db)
+        .await
+        .context(DatabaseErr)?
+        .context(UIDNotFoundErr { uid })?;
 
-    Ok(HttpResponse::Ok().json(user))
+    Ok(Json(user))
 }
 
-#[get("/me")]
+#[api_operation(
+    summary = "View self as logged in user",
+    security_scope(name = "session-id",)
+)]
 pub async fn view_me(
     db: Data<Database>,
     user: BasicUser<BasicGuestAuth>,
-) -> crate::Result<impl Responder> {
+) -> crate::Result<Json<UserView>> {
     let user = get_user_view_by_id(user.uid, &db)
         .await
         .context(DatabaseErr)?;
 
-    Ok(match user {
-        Some(user) => HttpResponse::Ok().json(&user),
+    match user {
+        Some(user) => Ok(Json(user)),
         None => {
             tracing::error!("User session passed but user object not found");
-            HttpResponse::InternalServerError().finish()
+            Err(Error::GenericInternalError)
         }
-    })
+    }
 }
