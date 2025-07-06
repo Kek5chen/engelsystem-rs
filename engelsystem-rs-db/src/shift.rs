@@ -1,6 +1,5 @@
 use entity::intern::*;
 use sea_orm::{prelude::*, JoinType, QueryOrder, QuerySelect};
-use time::OffsetDateTime;
 
 pub async fn add_shift(
     shift: shift::ActiveModel,
@@ -25,15 +24,13 @@ pub async fn get_shifts_by_user(
         select = select.limit(limit as u64);
     }
 
-    let now = OffsetDateTime::now_utc();
-
     if !include_expired {
-        select = select.filter(shift::Column::EndsAt.gt(now))
+        select = select.filter(Expr::col(shift::Column::EndsAt).gt(Expr::current_timestamp()))
     }
 
     if !include_started {
-        select = select.filter(shift::Column::StartsAt.gt(now))
+        select = select.filter(Expr::col(shift::Column::StartsAt).gt(Expr::current_timestamp()))
     }
-    
+
     Ok(select.all(db).await?)
 }
