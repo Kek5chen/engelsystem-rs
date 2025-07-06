@@ -1,5 +1,5 @@
 use actix_session::SessionInsertError;
-use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
+use actix_web::{http::StatusCode, ResponseError};
 use apistos::ApiErrorComponent;
 use snafu::Snafu;
 use tracing::error;
