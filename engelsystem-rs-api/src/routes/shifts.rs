@@ -17,6 +17,7 @@ use crate::{
 };
 
 #[api_operation(
+    tag = "shift",
     summary = "Get all shifts you are helping out in",
     security_scope(name = "session_id", scope = "user",)
 )]
@@ -79,6 +80,7 @@ impl NewShift {
 }
 
 #[api_operation(
+    tag = "shift",
     summary = "Add a shift",
     security_scope(name = "session-id", scope = "admin",)
 )]

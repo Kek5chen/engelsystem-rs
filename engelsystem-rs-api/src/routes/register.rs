@@ -28,7 +28,10 @@ pub struct RegistrationData {
     _tc_check: String,
 }
 
-#[api_operation(summary = "Request to register a new user account")]
+#[api_operation(
+    tag = "account",
+    summary = "Request to register a new user account"
+)]
 pub async fn request_register(
     Json(data): Json<RegistrationData>,
     db: Data<DatabaseConnection>,

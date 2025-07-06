@@ -25,7 +25,10 @@ async fn fetch_user_count_stats(db: &DatabaseConnection) -> crate::Result<UserCo
     })
 }
 
-#[api_operation(summary = "Get global user count statistics")]
+#[api_operation(
+    tag = "statistics",
+    summary = "Get global user count statistics"
+)]
 pub async fn user_count(db: Data<DatabaseConnection>) -> crate::Result<Json<UserCountStats>> {
     Ok(Json(fetch_user_count_stats(&db).await?))
 }

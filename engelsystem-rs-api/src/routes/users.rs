@@ -43,6 +43,7 @@ impl BasicAuthTrait for UserViewAuth {
 // assuming we don't want to filter out specific users depending on the callers permissions
 
 #[api_operation(
+    tag = "user",
     summary = "Get a view of all users",
     security_scope(name = "session-id", scope = "admin",)
 )]
@@ -56,6 +57,7 @@ pub async fn user_list(
 }
 
 #[api_operation(
+    tag = "user",
     summary = "View a user by their user id",
     security_scope(name = "session-id", scope = "user")
 )]
@@ -75,6 +77,7 @@ pub async fn view_user(
 }
 
 #[api_operation(
+    tag = "user",
     summary = "View self as logged in user",
     security_scope(name = "session-id",)
 )]

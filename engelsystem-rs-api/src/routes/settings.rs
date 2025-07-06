@@ -26,7 +26,11 @@ pub struct SettingsUpdateRequest {
     confirm_password: Option<String>,
 }
 
-#[api_operation(summary = "Update user settings", security_scope(name = "session-id",))]
+#[api_operation(
+    tag = "account",
+    summary = "Update user settings",
+    security_scope(name = "session-id")
+)]
 pub async fn update_settings(
     db: Data<DatabaseConnection>,
     session: BasicUser<BasicGuestAuth>,

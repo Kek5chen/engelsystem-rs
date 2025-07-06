@@ -20,6 +20,7 @@ pub struct LoginData {
 }
 
 #[api_operation(
+    tag = "account",
     summary = "Request to log in with the given credentials",
     skip_args = "session"
 )]
