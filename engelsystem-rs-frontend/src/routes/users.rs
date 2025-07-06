@@ -29,8 +29,7 @@ pub async fn user_list(
         .context(BackendErr)?;
 
     let rendered = render_template!(&templates, "user_list.html", session, [
-        "users" => &users,
-        "logged_in" => &true
+        "users" => &users
     ])?;
 
     Ok(Html::new(rendered))
@@ -55,8 +54,7 @@ pub async fn view_user(
         .context(BackendErr)?;
 
     let rendered = render_template!(&templates, "user_view.html", session, [
-        "user" => &users,
-        "logged_in" => &true
+        "user" => &users
     ])?;
 
     Ok(Html::new(rendered))
