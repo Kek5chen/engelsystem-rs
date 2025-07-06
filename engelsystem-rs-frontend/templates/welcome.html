@@ -30,8 +30,12 @@
         <p class="text-xl font-bold">{{ user.shift_time | duration_hh_mm }}</p>
       </div>
       <div>
-        <p class="underline text-[#C9C9C9] py-1">Naechste Schicht</p>
-        <p class="text-xl font-bold">00:00</p>
+        <p class="underline text-[#C9C9C9] py-1">Nächste Schicht</p>
+        {% if next_shift %}
+          <p class="text-xl font-bold">{{next_shift.starts_at | date}}/p>
+        {% else %}
+          <p class="text-xl font-bold">-</p>
+        {% endif %}
       </div>
     </div>
   </div>

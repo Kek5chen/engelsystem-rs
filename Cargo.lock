@@ -1502,6 +1502,7 @@ dependencies = [
  "migration",
  "rand 0.9.1",
  "sea-orm",
+ "sea-query",
  "serde",
  "serde_json",
  "snafu",

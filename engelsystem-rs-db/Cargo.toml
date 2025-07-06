@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 tokio = { version = "1.45.0", features = ["full", "test-util"] }
 sea-orm = { version = "1.1.11", features = ["sqlx-all", "runtime-tokio-rustls", "runtime-actix-rustls"] }
+sea-query = { version = "0.32.5", features = ["with-time"] }
 snafu = "0.8.5"
 
 tracing = "0.1.41"

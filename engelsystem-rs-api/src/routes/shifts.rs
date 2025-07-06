@@ -1,4 +1,4 @@
-use actix_web::web::{Data, Json};
+use actix_web::web::{Data, Json, Query};
 use apistos::{ApiComponent, api_operation};
 use chrono::{DateTime, Utc};
 use engelsystem_rs_db::{
@@ -12,20 +12,34 @@ use snafu::{OptionExt, ResultExt};
 use uuid::Uuid;
 
 use crate::{
-    authorize_middleware::{BasicAdminAuth, BasicUser, BasicUserAuth},
+    authorize_middleware::{BasicAdminAuth, BasicGuestAuth, BasicUser, BasicUserAuth},
     generated::{AngelTypeNotFoundErr, DatabaseErr, UserNotFoundErr},
 };
 
+fn b_true() -> bool {
+    true
+}
+
+#[derive(Deserialize, JsonSchema, ApiComponent)]
+pub struct ShiftFilter {
+    limit: Option<u32>,
+    #[serde(default = "b_true")]
+    include_expired: bool,
+    #[serde(default = "b_true")]
+    include_started: bool,
+}
+
 #[api_operation(
     tag = "shift",
-    summary = "Get all shifts you are helping out in",
+    summary = "Get all shifts you are helping out in with optional filters",
     security_scope(name = "session_id", scope = "user",)
 )]
 pub async fn shifts_self(
     db: Data<Database>,
-    user: BasicUser<BasicUserAuth>,
+    user: BasicUser<BasicGuestAuth>,
+    Query(filters): Query<ShiftFilter>,
 ) -> crate::Result<Json<Vec<Shift>>> {
-    let shifts = get_shifts_by_user(user.uid, &db)
+    let shifts = get_shifts_by_user(user.uid, filters.limit, filters.include_expired, filters.include_started, &db)
         .await
         .context(DatabaseErr)?;
 
@@ -95,3 +109,4 @@ pub async fn shift_add(
 
     Ok(Json(shifts))
 }
+

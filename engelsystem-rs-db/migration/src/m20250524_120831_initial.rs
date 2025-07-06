@@ -110,7 +110,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(AngelType::Table)
                     .if_not_exists()
-                    .col(pk_auto(AngelType::Id).primary_key())
+                    .col(pk_auto(AngelType::Id))
                     .col(timestamp(AngelType::CreatedAt).default(Expr::current_timestamp()))
                     .col(string_uniq(AngelType::Name))
                     .col(boolean(AngelType::NeedsIntroduction))
