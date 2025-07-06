@@ -20,6 +20,8 @@ pub struct Model {
     pub password_hash: String,
     #[sea_orm(default_value = 0)]
     pub role_id: u32,
+    #[sea_orm(default_value = 0)]
+    pub shift_time: u32,
 
     #[sea_orm(default_value = 0)]
     pub points: u32,
@@ -73,6 +75,7 @@ pub struct View {
     pub username: String,
     pub email: String,
     pub role: String,
+    pub shift_time: u32,
 
     pub points: u32,
 }

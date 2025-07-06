@@ -1,6 +1,6 @@
 use std::net::Ipv4Addr;
 
-use crate::error::generated::*;
+use crate::{error::generated::*, utils::templating::duration_hh_mm};
 use crate::routes::*;
 use actix_files::Files;
 use actix_web::{App, HttpServer, web::Data};
@@ -9,13 +9,15 @@ use tera::Tera;
 use tracing::debug;
 
 pub async fn run_server() -> crate::Result<()> {
-    let templates = match Tera::new("templates/*").context(TemplateErr) {
+    let mut templates = match Tera::new("templates/*").context(TemplateErr) {
         Ok(tmpls) => tmpls,
         Err(e) => {
             tracing::error!("Couldn't load templates: {e}");
             std::process::exit(1);
         }
     };
+
+    templates.register_filter("duration_hh_mm", duration_hh_mm);
 
     for template in templates.get_template_names() {
         debug!("loaded: {template}");

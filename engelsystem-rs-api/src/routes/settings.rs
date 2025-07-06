@@ -44,6 +44,7 @@ pub async fn update_settings(
         email: Set(new.email),
         password_hash: NotSet,
         role_id: NotSet,
+        shift_time: NotSet,
         points: NotSet,
     };
 

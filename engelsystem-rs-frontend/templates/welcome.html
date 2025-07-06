@@ -27,7 +27,7 @@
     <div class="flex flex-row justify-evenly">
       <div>
         <p class="underline text-[#C9C9C9] py-1">Gesamte Schichtzeit</p>
-        <p class="text-xl font-bold">{Schichtzeit}</p>
+        <p class="text-xl font-bold">{{ user.shift_time | duration_hh_mm }}</p>
       </div>
       <div>
         <p class="underline text-[#C9C9C9] py-1">Naechste Schicht</p>

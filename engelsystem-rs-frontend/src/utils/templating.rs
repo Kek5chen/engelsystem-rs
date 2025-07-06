@@ -1,3 +1,7 @@
+use std::{collections::{BTreeMap, HashMap}, time::Duration};
+
+use tera::{to_value, try_get_value};
+
 #[macro_export]
 macro_rules! render_template {
     ($templates:expr, $name:expr,
@@ -36,4 +40,16 @@ macro_rules! render_template {
             })
 
     }};
+}
+
+pub fn duration_hh_mm(
+    value: &serde_json::Value,
+    _: &HashMap<String, serde_json::Value>,
+) -> tera::Result<serde_json::Value> {
+    let value = try_get_value!("duration_hh_mm", "value", u32, value);
+
+    let hours = value / 3_600;
+    let minutes = (value % 3_600) / 60;
+
+    Ok(to_value(format!("{:02}:{:02}", hours, minutes)).unwrap())
 }
