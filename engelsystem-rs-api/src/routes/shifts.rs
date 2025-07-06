@@ -54,7 +54,7 @@ pub struct NewShift {
     pub name: String,
     pub description: Option<String>,
     pub angels_needed: u32,
-    pub angel_type: String,
+    pub angel_type: Option<String>,
 }
 
 impl NewShift {
@@ -71,12 +71,19 @@ impl NewShift {
             None => None,
         };
 
-        let angel_type = get_angel_type_id_by_name(&self.angel_type, db)
-            .await
-            .context(DatabaseErr)?
-            .context(AngelTypeNotFoundErr {
-                name: self.angel_type,
-            })?;
+        let angel_type = match self.angel_type {
+            Some(angel_type) => {
+                Some(
+                    get_angel_type_id_by_name(&angel_type, db)
+                        .await
+                        .context(DatabaseErr)?
+                        .context(AngelTypeNotFoundErr {
+                            name: angel_type,
+                        })?
+                )
+            }
+            None => None
+        };
 
         Ok(ActiveShift {
             id: NotSet,

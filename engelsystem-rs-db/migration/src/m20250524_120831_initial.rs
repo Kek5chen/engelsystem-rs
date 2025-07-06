@@ -154,7 +154,7 @@ impl MigrationTrait for Migration {
                     .col(string(Shift::Name))
                     .col(string_null(Shift::Description))
                     .col(integer(Shift::AngelsNeeded))
-                    .col(integer(Shift::AngelTypeId))
+                    .col(integer_null(Shift::AngelTypeId))
                     .foreign_key(&mut shift_angel_type)
                     .foreign_key(&mut shift_managed_by)
                     .foreign_key(&mut shift_created_by)

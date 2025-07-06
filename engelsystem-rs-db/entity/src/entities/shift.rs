@@ -18,7 +18,7 @@ pub struct Model {
     pub name: String,
     pub description: Option<String>,
     pub angels_needed: u32,
-    pub angel_type_id: u32,
+    pub angel_type_id: Option<u32>,
 }
 
 #[derive(Debug, EnumIter, DeriveRelation)]
