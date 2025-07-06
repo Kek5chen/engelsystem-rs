@@ -1,7 +1,8 @@
 use actix_session::SessionInsertError;
-use actix_web::{ResponseError, http::StatusCode};
+use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use apistos::ApiErrorComponent;
 use snafu::Snafu;
+use tracing::error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -78,7 +79,10 @@ impl ResponseError for Error {
             Error::SessionUnauthenticated | Error::LoginFailed => StatusCode::UNAUTHORIZED,
             Error::SessionUnauthorized => StatusCode::FORBIDDEN,
             Error::InvalidUid { .. } => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => {
+                error!("{self:?} || Readable: {self}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            },
         }
     }
 }
