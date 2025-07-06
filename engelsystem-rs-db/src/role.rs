@@ -21,6 +21,7 @@ use strum_macros::{EnumString, FromRepr, IntoStaticStr};
 pub enum RoleType {
     Guest = 1,
     User = 2,
+    #[strum(serialize = "Administrator", serialize = "Admin")]
     Admin = 3,
 }
 
