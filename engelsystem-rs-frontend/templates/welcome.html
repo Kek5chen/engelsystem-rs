@@ -9,7 +9,7 @@
 
 <section class="w-full p-5 md:p-25 lg:pt-25 flex flex-col items-center">
   <div class="py-10">
-    <h1 class="text-center text-4xl">Willkommen, <span class="font-bold">{{ user.username }}</span>!</h1>
+    <h1 class="text-center text-4xl">Willkommen, <span class="font-bold {% if is_admin %}text-red-500{% endif %}">{{ user.username }}</span>!</h1>
     <p class="text-gray-300 text-center">Schön, dich an Bord zu haben.</p>
   </div>
 

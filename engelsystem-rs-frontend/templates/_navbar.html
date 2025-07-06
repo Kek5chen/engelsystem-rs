@@ -12,8 +12,12 @@
     </div>
     {% else %}
       <!-- <a href="/settings" class="text-indigo-100 py-2.5">Einstellungen</a> -->
+      {% if is_admin %}
+        <a href="/admin" class="text-indigo-100 py-2.5">Admin</a>
+      {% endif %}
       <a href="/logout" class="text-indigo-100 py-2.5">Ausloggen</a>
     {% endif %}
     </div>
   </div>
 </nav>
+
