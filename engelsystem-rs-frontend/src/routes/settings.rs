@@ -75,7 +75,6 @@ pub async fn update_settings(
         .await?;
 
     if response.status().is_success() {
-        dbg!(response.status());
         Ok(HttpResponse::SeeOther()
             .append_header((header::LOCATION, "/settings?success=true"))
             .finish())
