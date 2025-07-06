@@ -4,15 +4,17 @@ const concurrently = require('concurrently');
 concurrently(
   [
     {
-      command: 'RUST_LOG=debug cargo watch -x "run --bin engelsystem-rs-frontend" -i "*sqlite*"',
+      command: 'cargo watch -x "run --bin engelsystem-rs-frontend" -i "*sqlite*"',
       name: 'UI',
       prefixColor: 'cyan',
-      cwd: path.resolve(__dirname, 'engelsystem-rs-frontend')
+      cwd: path.resolve(__dirname, 'engelsystem-rs-frontend'),
+      env: { RUST_LOG: 'debug'}
     },
     {
-      command: 'RUST_LOG=debug cargo watch -x "run --bin engelsystem-rs-api" -i "*sqlite*"',
+      command: 'cargo watch -x "run --bin engelsystem-rs-api" -i "*sqlite*"',
       name: 'API',
-      prefixColor: 'magenta'
+      prefixColor: 'magenta',
+      env: { RUST_LOG: 'debug'}
     },
     {
       command: 'npx tailwindcss -i ./assets/css/base.css -o ./assets/css/base-gen.css --watch',
